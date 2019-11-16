@@ -1,0 +1,41 @@
+apply plugin: 'application'
+apply plugin: 'com.github.hexomod.macro.preprocessor'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'com.github.hexomod', name: 'gradle.macro.preprocessor.plugin', version: '0.1'
+    }
+}
+
+repositories {
+    jcenter()
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+}
+
+application {
+    mainClassName = 'com.github.hexomod.macro.basic.Main'
+}
+
+macroPreprocessorSettings {
+    //verbose true
+    //source = "src/main/java"
+    //source = project.file("src/main/java").toString()
+    //source = [ "src/api/java",  "src/main/java" ]
+    //source = [ "src/api/java", file("src/main/java").toString() ]
+    //resources = "src/main/resources"
+    //resources = project.file("src/main/resources").toString()
+    //resources = [ "src/api/resources",  "src/main/resources" ]
+    //resources = [ "src/api/resources", file("src/main/resources").toString() ]
+    //target = "build/preprocessor/macro"
+    //target = file(buildDir.toString() + "/preprocessor/macro")
+    vars = [ VAR_STRING: "value_string", VAR_BOOL: true, VAR_INT: 1, VAR_DOUBLE: 1.0, PROJECT: "Basic", DEBUG: true]
+}

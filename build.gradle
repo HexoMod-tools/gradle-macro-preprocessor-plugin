@@ -1,0 +1,101 @@
+
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'com.gradle.plugin-publish' version '0.10.0'
+    id "com.github.hierynomus.license" version "0.15.0"
+}
+
+group = 'com.github.hexomod'
+version = '0.1'
+
+// Minimum java version
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+// define minimum java version and encoding
+tasks.withType(JavaCompile) {
+    // Minimum java version
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    // Make sure to use UTF-8
+    options.encoding = 'UTF-8'
+}
+
+// Repositories for dependencies resolution
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+// Dependencies of this plugin
+dependencies {
+    compile gradleApi()
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
+
+    testCompile  group: 'junit', name: 'junit', version: '4.12'
+}
+
+// License checker
+license {
+    // License parameters
+    ext.name = rootProject.name
+    ext.author = "Hexosse"
+    ext.url = "https://github.com/hexomod-tools/" + rootProject.name
+    ext.year = "2019"
+    // License template file to use
+    header = rootProject.file("License.tpl")
+    // Be extra strict in the formatting of existing headers
+    strictCheck true
+    // Only java files
+    include "**/*.java"
+    // Use JavaScript like comments
+    mapping { java = 'SLASHSTAR_STYLE' }
+}
+
+pluginBundle {
+    website = 'https://github.com/HexoMod-tools/gradle-macro-preprocessor-plugin'
+    vcsUrl = 'https://github.com/HexoMod-tools/gradle-macro-preprocessor-plugin.git'
+    description = 'A simple java macro preprocessor plugin'
+    tags = ['macro', 'preprocessor']
+
+    plugins {
+        'gradle-macro-preprocessor-plugin' {
+            id = 'com.github.hexomod.macro.preprocessor'
+            displayName = 'A simple java macro preprocessor plugin'
+        }
+    }
+}
+
+// Publish to maven repository
+publishing {
+    publications {
+        gradlePlugin(MavenPublication) {
+            from components.java
+            pom.withXml {
+                asNode().appendNode('url', pluginBundle.website)
+                asNode().appendNode('description', pluginBundle.description)
+
+                def licenses = asNode().appendNode('licenses')
+                def license = licenses.appendNode('license')
+                license.appendNode('name', 'MIT')
+                license.appendNode('url', pluginBundle.website + '/LICENSE.md')
+
+                def scm = asNode().appendNode('scm')
+                scm.appendNode('url', pluginBundle.website)
+                scm.appendNode('connection', pluginBundle.vcsUrl)
+
+                def issueManagement = asNode().appendNode('issueManagement')
+                issueManagement.appendNode('system', 'GitHub')
+                issueManagement.appendNode('url', pluginBundle.website + '/issues')
+
+                def developers = asNode().appendNode('developers')
+                def developer = developers.appendNode('developer')
+                developer.appendNode('id', 'hexosse')
+                developer.appendNode('name', 'hexosse')
+                developer.appendNode('url', 'https://github.com/hexosse')
+            }
+        }
+    }
+}
