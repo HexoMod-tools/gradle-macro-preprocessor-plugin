@@ -134,7 +134,7 @@ public class PreprocessorTask extends DefaultTask {
 
         log("  Updating main sourset...");
 
-        SourceSet main = project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName("main");
+        SourceSet main = project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
         main.getJava().setSrcDirs(Collections.singleton(srcTarget));
         main.getResources().setSrcDirs(Collections.singleton(resTarget));
     }
