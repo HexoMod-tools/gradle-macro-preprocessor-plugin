@@ -52,7 +52,7 @@ public class PreprocessorExtension {
      * Source root folders to process
      * If empty, default project source folder will be used.
      */
-    private Set<String> source;
+    private Set<String> sources;
 
     /**
      * Resources root folders to process
@@ -77,15 +77,17 @@ public class PreprocessorExtension {
     public PreprocessorExtension(final Project project) {
         this.project = project;
         this.verbose = false;
-        this.source = new LinkedHashSet<>();
+        this.sources = new LinkedHashSet<>();
         this.resources = new LinkedHashSet<>();
         this.target = new File(project.getBuildDir(), "preprocessor/macro");
+        this.vars = new LinkedHashMap<>();
     }
 
 
     public Project getProject() {
         return this.project;
     }
+
 
     public void setVerbose(boolean verbose) {
         this.verbose = verbose;
@@ -95,8 +97,9 @@ public class PreprocessorExtension {
         return this.verbose;
     }
 
-    public void setSource(String source) {
-        setSources(new HashSet<>(Collections.singletonList(source)));
+
+    public void setSources(String sources) {
+        setSources(new HashSet<>(Collections.singletonList(sources)));
     }
 
     public void setSources(List<String> sources) {
@@ -104,25 +107,40 @@ public class PreprocessorExtension {
     }
 
     public void setSources(Set<String> sources) {
-        // Clear existing sources
-        this.source.clear();
+        this.sources.clear();
+        setSource(sources);
+    }
+
+    public void setSource(String source) {
+        setSource(new HashSet<>(Collections.singletonList(source)));
+    }
+
+    public void setSource(List<String> source) {
+        setSource(new HashSet<>(source));
+    }
+
+    public void setSource(Set<String> sources) {
         // Check that all sources are valid
         for (String dir : sources) {
             Path path = new File(dir).toPath();
             if(Files.isDirectory(path) && Files.exists(path)) {
-                this.source.add(path.toAbsolutePath().toString());
+                this.sources.add(path.toAbsolutePath().toString());
                 continue;
             }
-            path = new File(this.project.getRootDir(), dir).toPath();
-            if(Files.isDirectory(path) && Files.exists(path)) {
-                this.source.add(path.toAbsolutePath().toString());
+            try {
+                path = new File(this.project.getRootDir(), dir).toPath();
+                if(Files.isDirectory(path) && Files.exists(path)) {
+                    this.sources.add(path.toAbsolutePath().toString());
+                }
             }
+            catch (Exception ignored) {}
         }
     }
 
-    public Set<String> getSource() {
-        return this.source;
+    public Set<String> getSources() {
+        return this.sources;
     }
+
 
     public void setResources(String resources) {
         setResources(new HashSet<>(Collections.singletonList(resources)));
@@ -133,8 +151,19 @@ public class PreprocessorExtension {
     }
 
     public void setResources(Set<String> resources) {
-        // Clear existing resources
         this.resources.clear();
+        setResource(resources);
+    }
+
+    public void setResource(String resource) {
+        setResource(new HashSet<>(Collections.singletonList(resource)));
+    }
+
+    public void setResource(List<String> resource) {
+        setResource(new HashSet<>(resource));
+    }
+
+    public void setResource(Set<String> resources) {
         // Check that all resources are valid
         for (String dir : resources) {
             Path path = new File(dir).toPath();
@@ -142,16 +171,20 @@ public class PreprocessorExtension {
                 this.resources.add(path.toAbsolutePath().toString());
                 continue;
             }
-            path = new File(this.project.getRootDir(), dir).toPath();
-            if(Files.isDirectory(path) && Files.exists(path)) {
-                this.resources.add(path.toAbsolutePath().toString());
+            try {
+                path = new File(this.project.getRootDir(), dir).toPath();
+                if(Files.isDirectory(path) && Files.exists(path)) {
+                    this.resources.add(path.toAbsolutePath().toString());
+                }
             }
+            catch (Exception ignored) {}
         }
     }
 
     public Set<String> getResources() {
         return this.resources;
     }
+
 
     public void setTarget(File target) {
         this.target = target;
@@ -171,8 +204,9 @@ public class PreprocessorExtension {
         return this.target;
     }
 
+
     public void setVars(Map<String, Object> vars) {
-        this.vars = vars;
+        this.vars.putAll(vars);
     }
 
     public Map<String, Object> getVars() {

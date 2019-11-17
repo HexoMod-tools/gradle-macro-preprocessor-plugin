@@ -63,7 +63,7 @@ public class PreprocessorTask extends DefaultTask {
 
         // Data
         Project project = this.extension.getProject();
-        Set<String> sources = this.extension.getSource();
+        Set<String> sources = this.extension.getSources();
         Set<String> resources = this.extension.getResources();
         File target = this.extension.getTarget();
         File srcTarget = new File(target, "java");
