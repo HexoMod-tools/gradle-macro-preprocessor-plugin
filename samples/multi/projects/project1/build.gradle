@@ -7,7 +7,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'com.github.hexomod', name: 'gradle.macro.preprocessor.plugin', version: '0.1'
+        classpath group: 'com.github.hexomod', name: 'gradle.macro.preprocessor.plugin', version: '0.2'
     }
 }
 
