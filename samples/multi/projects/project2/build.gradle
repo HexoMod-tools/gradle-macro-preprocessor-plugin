@@ -7,7 +7,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'com.github.hexomod', name: 'MacroPreprocessor', version: '0.3'
+        classpath group: 'com.github.hexomod', name: 'MacroPreprocessor', version: '0.4'
     }
 }
 
