@@ -1,5 +1,5 @@
 /*
- * This file is part of gradle.macro.preprocessor.plugin, licensed under the MIT License (MIT).
+ * This file is part of MacroPreprocessor, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2019 Hexosse <https://github.com/hexomod-tools/gradle.macro.preprocessor.plugin>
  *
@@ -25,9 +25,12 @@ package com.github.hexomod.macro;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import static com.github.hexomod.macro.Preprocessor.SLASH_KEYWORDS;
 import static org.junit.Assert.*;
 
 public class PreprocessorTest {
@@ -105,6 +108,336 @@ public class PreprocessorTest {
         assertTrue(preprocessor.evaluateExpression("VAR_DOUBLE!=0"));
         // Complex
         assertTrue(preprocessor.evaluateExpression("VAR_STRING==value_string && VAR_INT==1"));
+        assertTrue(preprocessor.evaluateExpression("VAR_BOOL==true && VAR_INT==1"));
         assertTrue(preprocessor.evaluateExpression("VAR_STRING==another string || VAR_INT==1"));
+    }
+
+    @Test
+    public void processLines_simple_if_true() {
+
+        String testLine = "String message = 'test';";
+
+        List<String> lines = new ArrayList<>();
+        lines.add("//#if VAR_INT==1");
+        lines.add(testLine);
+        lines.add("//#endif");
+
+        Preprocessor preprocessor = new Preprocessor(vars);
+        lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
+
+        assertTrue(lines.get(1).compareTo(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(1).compareTo(preprocessor.commentLine(testLine, SLASH_KEYWORDS))==0);
+    }
+
+    @Test
+    public void processLines_simple_if_false() {
+
+        String testLine = "String message = 'test';";
+
+        List<String> lines = new ArrayList<>();
+        lines.add("//#if VAR_INT!=1");
+        lines.add(testLine);
+        lines.add("//#endif");
+
+        Preprocessor preprocessor = new Preprocessor(vars);
+        lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
+
+        assertFalse(lines.get(1).compareTo(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(1).compareTo(preprocessor.commentLine(testLine, SLASH_KEYWORDS))==0);
+    }
+
+    @Test
+    public void processLines_complex_if_true() {
+
+        String testLine1 = "String message1 = 'test 1';";
+        String testLine2 = "String message2 = 'test 2';";
+
+        List<String> lines = new ArrayList<>();
+        lines.add("//#if VAR_INT==1");
+        lines.add(testLine1);
+        lines.add("//#if VAR_BOOL==true");
+        lines.add(testLine2);
+        lines.add("//#endif");
+        lines.add("//#endif");
+
+        Preprocessor preprocessor = new Preprocessor(vars);
+        lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
+
+        assertTrue(lines.get(1).compareTo(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(1).compareTo(preprocessor.commentLine(testLine1, SLASH_KEYWORDS))==0);
+
+        assertTrue(lines.get(3).compareTo(preprocessor.uncommentLine(testLine2, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(3).compareTo(preprocessor.commentLine(testLine2, SLASH_KEYWORDS))==0);
+    }
+
+    @Test
+    public void processLines_complex_if_false() {
+
+        String testLine1 = "String message1 = 'test 1';";
+        String testLine2 = "String message2 = 'test 2';";
+
+        List<String> lines = new ArrayList<>();
+        lines.add("//#if VAR_INT==1");              // true
+        lines.add(testLine1);
+            lines.add("//#if VAR_BOOL==false");     // false
+            lines.add(testLine2);
+            lines.add("//#endif");
+        lines.add("//#endif");
+
+        Preprocessor preprocessor = new Preprocessor(vars);
+        lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
+
+        assertTrue(lines.get(1).compareTo(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(3).compareTo(preprocessor.uncommentLine(testLine2, SLASH_KEYWORDS))==0);
+
+        assertFalse(lines.get(1).compareTo(preprocessor.commentLine(testLine1, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(3).compareTo(preprocessor.commentLine(testLine2, SLASH_KEYWORDS))==0);
+    }
+
+    @Test
+    public void processLines_simple_elseif_t_f_f() {
+
+        String testLine0 = "String message = '0';";
+        String testLine1 = "String message = '1';";
+        String testLine = "String message = '';";
+
+        List<String> lines = new ArrayList<>();
+        lines.add("//#if VAR_DOUBLE>=1");           // true
+        lines.add(testLine0);
+        lines.add("//#elseif VAR_INT>=0");          // false
+        lines.add(testLine1);
+        lines.add("//#else");                       // false
+        lines.add(testLine);
+        lines.add("//#endif");
+
+        Preprocessor preprocessor = new Preprocessor(vars);
+        lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
+
+        assertTrue(lines.get(1).compareTo(preprocessor.uncommentLine(testLine0, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(3).compareTo(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(5).compareTo(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS))==0);
+
+        assertFalse(lines.get(1).compareTo(preprocessor.commentLine(testLine0, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(3).compareTo(preprocessor.commentLine(testLine1, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(5).compareTo(preprocessor.commentLine(testLine, SLASH_KEYWORDS))==0);
+    }
+
+    @Test
+    public void processLines_simple_elseif_f_t_f() {
+
+        String testLine0 = "String message = '0';";
+        String testLine1 = "String message = '1';";
+        String testLine = "String message = '';";
+
+        List<String> lines = new ArrayList<>();
+        lines.add("//#if VAR_INT==0");          // false
+        lines.add(testLine0);
+        lines.add("//#elseif VAR_INT==1");      // true
+        lines.add(testLine1);
+        lines.add("//#else");                   // false
+        lines.add(testLine);
+        lines.add("//#endif");
+
+        Preprocessor preprocessor = new Preprocessor(vars);
+        lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
+
+        assertFalse(lines.get(1).compareTo(preprocessor.uncommentLine(testLine0, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(3).compareTo(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(5).compareTo(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS))==0);
+
+        assertTrue(lines.get(1).compareTo(preprocessor.commentLine(testLine0, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(3).compareTo(preprocessor.commentLine(testLine1, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(5).compareTo(preprocessor.commentLine(testLine, SLASH_KEYWORDS))==0);
+    }
+
+    @Test
+    public void processLines_simple_elseif_f_f_t() {
+
+        String testLine0 = "String message = '0';";
+        String testLine1 = "String message = '1';";
+        String testLine = "String message = '';";
+
+        List<String> lines = new ArrayList<>();
+        lines.add("//#if VAR_DOUBLE>=2");           // false
+        lines.add(testLine0);
+        lines.add("//#elseif VAR_INT>1");           // false
+        lines.add(testLine1);
+        lines.add("//#else");                       // true
+        lines.add(testLine);
+        lines.add("//#endif");
+
+        Preprocessor preprocessor = new Preprocessor(vars);
+        lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
+
+        assertFalse(lines.get(1).compareTo(preprocessor.uncommentLine(testLine0, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(3).compareTo(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(5).compareTo(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS))==0);
+
+        assertTrue(lines.get(1).compareTo(preprocessor.commentLine(testLine0, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(3).compareTo(preprocessor.commentLine(testLine1, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(5).compareTo(preprocessor.commentLine(testLine, SLASH_KEYWORDS))==0);
+    }
+
+    @Test
+    public void processLines_complex_elseif_t_f_f() {
+
+        String testLine0 = "String message = '0';";
+        String testLine1 = "String message = '1';";
+        String testLine2 = "String message = '2';";
+        String testLine3 = "String message = '3';";
+        String testLine4 = "String message = '4';";
+        String testLine = "String message = '';";
+
+        List<String> lines = new ArrayList<>();
+        lines.add("//#if VAR_DOUBLE>=1");           // true
+        lines.add(testLine0);
+            lines.add("//#if VAR_DOUBLE>=1");           // true
+            lines.add(testLine1);
+            lines.add("//#elseif VAR_INT>=0");          // false
+            lines.add(testLine2);
+            lines.add("//#else");                       // false
+            lines.add(testLine3);
+            lines.add("//#endif");
+        lines.add("//#elseif VAR_INT>=0");          // false
+        lines.add(testLine4);
+        lines.add("//#else");                       // false
+        lines.add(testLine);
+        lines.add("//#endif");
+
+        Preprocessor preprocessor = new Preprocessor(vars);
+        lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
+
+        assertTrue(lines.get(1).compareTo(preprocessor.uncommentLine(testLine0, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(3).compareTo(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(5).compareTo(preprocessor.uncommentLine(testLine2, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(7).compareTo(preprocessor.uncommentLine(testLine3, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(10).compareTo(preprocessor.uncommentLine(testLine4, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(12).compareTo(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS))==0);
+
+        assertFalse(lines.get(1).compareTo(preprocessor.commentLine(testLine0, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(3).compareTo(preprocessor.commentLine(testLine1, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(5).compareTo(preprocessor.commentLine(testLine2, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(7).compareTo(preprocessor.commentLine(testLine3, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(10).compareTo(preprocessor.commentLine(testLine4, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(12).compareTo(preprocessor.commentLine(testLine, SLASH_KEYWORDS))==0);
+    }
+
+    @Test
+    public void processLines_complex_elseif_f_t_f() {
+
+        String testLine0 = "String message = '0';";
+        String testLine1 = "String message = '1';";
+        String testLine2 = "String message = '2';";
+        String testLine3 = "String message = '3';";
+        String testLine4 = "String message = '4';";
+        String testLine = "String message = '';";
+
+        List<String> lines = new ArrayList<>();
+        lines.add("//#if VAR_INT==0");          // false
+        lines.add(testLine0);
+            lines.add("//#if VAR_INT==0");          // false
+            lines.add(testLine1);
+            lines.add("//#elseif VAR_INT==1");      // false
+            lines.add(testLine2);
+            lines.add("//#else");                   // false
+            lines.add(testLine3);
+            lines.add("//#endif");
+        lines.add("//#elseif VAR_INT==1");      // true
+        lines.add(testLine4);
+        lines.add("//#else");                   // false
+        lines.add(testLine);
+        lines.add("//#endif");
+
+        Preprocessor preprocessor = new Preprocessor(vars);
+        lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
+
+        assertFalse(lines.get(1).compareTo(preprocessor.uncommentLine(testLine0, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(3).compareTo(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(5).compareTo(preprocessor.uncommentLine(testLine2, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(7).compareTo(preprocessor.uncommentLine(testLine3, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(10).compareTo(preprocessor.uncommentLine(testLine4, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(12).compareTo(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS))==0);
+
+        assertTrue(lines.get(1).compareTo(preprocessor.commentLine(testLine0, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(3).compareTo(preprocessor.commentLine(testLine1, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(5).compareTo(preprocessor.commentLine(testLine2, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(7).compareTo(preprocessor.commentLine(testLine3, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(10).compareTo(preprocessor.commentLine(testLine4, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(12).compareTo(preprocessor.commentLine(testLine, SLASH_KEYWORDS))==0);
+    }
+
+    @Test
+    public void processLines_complex_elseif_f_f_t() {
+
+        String testLine0 = "String message = '0';";
+        String testLine1 = "String message = '1';";
+        String testLine2 = "String message = '2';";
+        String testLine3 = "String message = '3';";
+        String testLine4 = "String message = '4';";
+        String testLine = "String message = '';";
+
+        List<String> lines = new ArrayList<>();
+        lines.add("//#if VAR_DOUBLE>=2");           // false
+        lines.add(testLine0);
+        lines.add("//#elseif VAR_INT>1");           // false
+        lines.add(testLine1);
+        lines.add("//#else");                       // true
+        lines.add(testLine2);
+            lines.add("//#if VAR_DOUBLE>=2");           // false
+            lines.add(testLine3);
+            lines.add("//#elseif VAR_INT>1");           // false
+            lines.add(testLine4);
+            lines.add("//#else");                       // true
+            lines.add(testLine);
+            lines.add("//#endif");
+        lines.add("//#endif");
+
+        Preprocessor preprocessor = new Preprocessor(vars);
+        lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
+
+        assertFalse(lines.get(1).compareTo(preprocessor.uncommentLine(testLine0, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(3).compareTo(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(5).compareTo(preprocessor.uncommentLine(testLine2, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(7).compareTo(preprocessor.uncommentLine(testLine3, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(9).compareTo(preprocessor.uncommentLine(testLine4, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(11).compareTo(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS))==0);
+
+        assertTrue(lines.get(1).compareTo(preprocessor.commentLine(testLine0, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(3).compareTo(preprocessor.commentLine(testLine1, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(5).compareTo(preprocessor.commentLine(testLine2, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(7).compareTo(preprocessor.commentLine(testLine3, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(9).compareTo(preprocessor.commentLine(testLine4, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(11).compareTo(preprocessor.commentLine(testLine, SLASH_KEYWORDS))==0);
+    }
+
+    @Test
+    public void processLines_simple_ifdef_elseif_t_f_f() {
+
+        String debug = "String message = '0';";
+        String testLine0 = "String message = '0';";
+        String testLine1 = "String message = '1';";
+        String testLine = "String message = '';";
+
+        List<String> lines = new ArrayList<>();
+        lines.add("//#ifdef VAR_BOOL");                 // true
+            lines.add("//#if VAR_DOUBLE>=1");           // true
+            lines.add(testLine0);
+            lines.add("//#elseif VAR_INT>=0");          // false
+            lines.add(testLine1);
+            lines.add("//#else");                       // false
+            lines.add(testLine);
+            lines.add("//#endif");
+        lines.add("//#endif");
+
+        Preprocessor preprocessor = new Preprocessor(vars);
+        lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
+
+        assertTrue(lines.get(2).compareTo(preprocessor.uncommentLine(testLine0, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(4).compareTo(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS))==0);
+        assertFalse(lines.get(6).compareTo(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS))==0);
+
+        assertFalse(lines.get(2).compareTo(preprocessor.commentLine(testLine0, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(4).compareTo(preprocessor.commentLine(testLine1, SLASH_KEYWORDS))==0);
+        assertTrue(lines.get(6).compareTo(preprocessor.commentLine(testLine, SLASH_KEYWORDS))==0);
     }
 }

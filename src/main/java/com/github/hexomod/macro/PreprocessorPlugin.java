@@ -1,5 +1,5 @@
 /*
- * This file is part of gradle.macro.preprocessor.plugin, licensed under the MIT License (MIT).
+ * This file is part of MacroPreprocessor, licensed under the MIT License (MIT).
  *
  * Copyright (c) 2019 Hexosse <https://github.com/hexomod-tools/gradle.macro.preprocessor.plugin>
  *
@@ -22,7 +22,6 @@
  * THE SOFTWARE.
  */
 package com.github.hexomod.macro;
-
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;

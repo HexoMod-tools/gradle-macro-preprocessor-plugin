@@ -7,7 +7,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'com.github.hexomod', name: 'gradle.macro.preprocessor.plugin', version: '0.2'
+        classpath group: 'com.github.hexomod', name: 'MacroPreprocessor', version: '0.3'
     }
 }
 
@@ -42,5 +42,5 @@ macroPreprocessorSettings {
     //target = "build/preprocessor/macro"
     //target = file(buildDir.toString() + "/preprocessor/macro")
 
-    vars = [VAR_STRING: "value_string", VAR_BOOL: true, VAR_INT: 1, VAR_DOUBLE: 1.0, PROJECT: "Basic", DEBUG: true]
+    vars = [VAR_STRING: "value_string", VAR_BOOL: true, VAR_INT: 1, VAR_DOUBLE: 2.0, PROJECT: "Basic", DEBUG: true]
 }

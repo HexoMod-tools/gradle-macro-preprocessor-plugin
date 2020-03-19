@@ -1,13 +1,14 @@
 
 plugins {
     id 'java'
+    id 'java-gradle-plugin'
     id 'maven-publish'
-    id 'com.gradle.plugin-publish' version '0.10.0'
+    id 'com.gradle.plugin-publish' version '0.10.1'
     id "com.github.hierynomus.license" version "0.15.0"
 }
 
 group = 'com.github.hexomod'
-version = '0.2'
+version = '0.3'
 
 // Minimum java version
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -42,7 +43,7 @@ license {
     // License parameters
     ext.name = rootProject.name
     ext.author = "Hexosse"
-    ext.url = "https://github.com/hexomod-tools/" + rootProject.name
+    ext.url = "https://github.com/hexomod-tools/gradle.macro.preprocessor.plugin"
     ext.year = "2019"
     // License template file to use
     header = rootProject.file("License.tpl")
@@ -54,16 +55,19 @@ license {
     mapping { java = 'SLASHSTAR_STYLE' }
 }
 
+// plugin definition
 pluginBundle {
     website = 'https://github.com/HexoMod-tools/gradle-macro-preprocessor-plugin'
     vcsUrl = 'https://github.com/HexoMod-tools/gradle-macro-preprocessor-plugin.git'
     description = 'A simple java macro preprocessor plugin'
     tags = ['macro', 'preprocessor']
-
+}
+gradlePlugin {
     plugins {
-        'gradle-macro-preprocessor-plugin' {
+        gradleMacroPreprocessorPlugin {
             id = 'com.github.hexomod.macro.preprocessor'
             displayName = 'A simple java macro preprocessor plugin'
+            implementationClass = 'com.github.hexomod.macro.PreprocessorPlugin'
         }
     }
 }

@@ -21,7 +21,7 @@ public class Greeting {
         //#endif
 
         //#if VAR_INT==1
-        message += "VAR_BOOL equal 1" + "\n";
+        message += "VAR_INT equal 1" + "\n";
         //#endif
 
         //#if VAR_DOUBLE==2.0
