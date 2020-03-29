@@ -44,7 +44,7 @@ public class Preprocessor {
         put("else",    "//#else");
         put("elseif",  "//#elseif");
         put("endif",   "//#endif");
-        put("comment", "//#");
+        put("comment", "///");
     }};
 
     static final Map<String, String> HASH_KEYWORDS = new HashMap<String, String>() {{
@@ -53,7 +53,7 @@ public class Preprocessor {
         put("else",    "##else");
         put("elseif",  "##elseif");
         put("endif",   "##endif");
-        put("comment", "##");
+        put("comment", "###");
     }};
 
     static Map<String, Map<String, String>> EXTENSION_KEYWORDS = new HashMap<String, Map<String, String>>() {{

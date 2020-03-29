@@ -119,7 +119,7 @@ public class PreprocessorTest {
 
         List<String> lines = new ArrayList<>();
         lines.add("//#if VAR_INT==1");
-        lines.add(testLine);
+        lines.add("///" + testLine);
         lines.add("//#endif");
 
         Preprocessor preprocessor = new Preprocessor(vars);

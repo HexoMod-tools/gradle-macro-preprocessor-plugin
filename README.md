@@ -7,6 +7,7 @@ A simple macro preprocessor for java
 
 `#ifdef`  
 `#if`  
+`#elseif`  
 `#else`  
 `#endif`  
 
@@ -47,6 +48,6 @@ In Java the only allowed way to inject directives and to not break work of tools
     //#ifdef DEBUG
     public static boolean DEBUG = true; 
     //#else
-    //#public static boolean DEBUG = false; 
+    ///public static boolean DEBUG = false; 
     //#endif
 ```

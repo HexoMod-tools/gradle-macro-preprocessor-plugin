@@ -56,6 +56,12 @@ public class PreprocessorPlugin implements Plugin<Project> {
         Task javaCompile = project.getTasks().getByName("compileJava");
         javaCompile.dependsOn(macroPreprocessorTask);
 
+        // Make macroPreprocessor task depends on replace preprocessor (if exist)
+        try {
+            Task replacePreprocessor = project.getTasks().getByName("replacePreprocessor");
+            macroPreprocessorTask.get().dependsOn(replacePreprocessor);
+        } catch (UnknownTaskException ignored) {}
+
         // Make sourceJava task depends on macro preprocessor (if exist)
         try {
             Task sourceJava = project.getTasks().getByName("sourceJava");
