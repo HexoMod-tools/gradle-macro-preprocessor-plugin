@@ -64,10 +64,15 @@ public class Preprocessor {
     }};
 
     private Map<String, Object> vars;
-
+    private boolean remove;
 
     public Preprocessor(Map<String, Object> vars) {
+        this(vars, false);
+    }
+
+    public Preprocessor(Map<String, Object> vars, boolean remove) {
         this.vars = vars;
+        this.remove = remove;
     }
 
     public void process(File inFile, File outFile) throws IOException {
@@ -91,7 +96,7 @@ public class Preprocessor {
                 FileUtils.writeLines(outFile, StandardCharsets.UTF_8.toString(), lines, "\n", false );
             }
             catch (Exception e) {
-                 if(e instanceof ParserException) { throw e; }
+                if(e instanceof ParserException) { throw e; }
                 else {  throw new RuntimeException("Failed to convert file " + inFile, e); }
             }
         }
@@ -118,7 +123,7 @@ public class Preprocessor {
                 //
                 skips.push(active);
                 // Keep macro line
-                newLines.add(line);
+                if(!remove) newLines.add(line);
             }
             // if
             else if(trimLine.startsWith(keywords.get("if"))) {
@@ -129,7 +134,7 @@ public class Preprocessor {
                 //
                 skips.push(active);
                 // Keep macro line
-                newLines.add(line);
+                if(!remove) newLines.add(line);
             }
             // elseif
             else if(trimLine.startsWith(keywords.get("elseif"))) {
@@ -154,7 +159,7 @@ public class Preprocessor {
                     state.push(false);
                 }
                 // Keep macro line
-                newLines.add(line);
+                if(!remove) newLines.add(line);
             }
             // else
             else if(trimLine.startsWith(keywords.get("else"))) {
@@ -176,7 +181,7 @@ public class Preprocessor {
                     state.push(false);
                 }
                 // Keep macro line
-                newLines.add(line);
+                if(!remove) newLines.add(line);
             }
             // endif
             else if(trimLine.startsWith(keywords.get("endif"))) {
@@ -185,13 +190,17 @@ public class Preprocessor {
                 //
                 skips.pop();
                 // Keep macro line
-                newLines.add(line);
+                if(!remove) newLines.add(line);
             }
             else {
                 // get last active state
                 boolean active = state.getFirst();
                 //
-                newLines.add(active ? uncommentLine(line, keywords) : commentLine(line, keywords));
+                if(active)
+                    newLines.add(uncommentLine(line, keywords));
+                else {
+                    if(!remove) newLines.add(commentLine(line, keywords));
+                }
             }
         }
         return newLines;

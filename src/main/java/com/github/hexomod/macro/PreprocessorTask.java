@@ -57,7 +57,7 @@ public class PreprocessorTask extends DefaultTask {
     public void process() throws IOException {
 
         // Instantiate the preprocessor
-        Preprocessor preprocessor = new Preprocessor(this.extension.getVars());
+        Preprocessor preprocessor = new Preprocessor(this.extension.getVars(), this.extension.isRemove());
 
         log("Starting macro preprocessor");
 

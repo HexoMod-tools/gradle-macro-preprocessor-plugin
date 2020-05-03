@@ -49,6 +49,11 @@ public class PreprocessorExtension {
     private boolean verbose;
 
     /**
+     * Remove commented lines
+     */
+    private boolean remove;
+
+    /**
      * Source root folders to process
      * If empty, default project source folder will be used.
      */
@@ -77,6 +82,7 @@ public class PreprocessorExtension {
     public PreprocessorExtension(final Project project) {
         this.project = project;
         this.verbose = false;
+        this.remove = false;
         this.sources = new LinkedHashSet<>();
         this.resources = new LinkedHashSet<>();
         this.target = new File(project.getBuildDir(), "preprocessor/macro");
@@ -95,6 +101,15 @@ public class PreprocessorExtension {
 
     public boolean isVerbose() {
         return this.verbose;
+    }
+
+
+    public void setRemove(boolean remove) {
+        this.remove = remove;
+    }
+
+    public boolean isRemove() {
+        return this.remove;
     }
 
 
