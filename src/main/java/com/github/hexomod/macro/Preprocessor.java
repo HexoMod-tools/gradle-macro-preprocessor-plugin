@@ -236,7 +236,7 @@ public class Preprocessor {
             return 0;
         }
         int count = 0;
-        while ( Character.isWhitespace(str.charAt(count))) {
+        while (str.length() > count && Character.isWhitespace(str.charAt(count))) {
             ++count;
         }
         return count;
