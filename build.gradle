@@ -3,12 +3,12 @@ plugins {
     id 'java'
     id 'java-gradle-plugin'
     id 'maven-publish'
-    id 'com.gradle.plugin-publish' version '0.11.0'
+    id 'com.gradle.plugin-publish' version '0.16.0'
     id "com.github.hierynomus.license" version "0.15.0"
 }
 
 group = 'com.github.hexomod'
-version = '0.6'
+version = '0.7'
 
 // Minimum java version
 sourceCompatibility = JavaVersion.VERSION_1_8
