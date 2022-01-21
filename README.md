@@ -13,11 +13,29 @@ A simple macro preprocessor for java
 
 # How to use
 
-The preprocessor is published in Gradle central
+The preprocessor is published in [Gradle central](https://plugins.gradle.org/plugin/com.github.hexomod.macro.preprocessor).
+
+Using the plugins DSL:
 ```gradle
-plugin {
-    id: 'com.github.hexomod.macro.preprocessor'
+plugins {
+  id "com.github.hexomod.macro.preprocessor" version "0.8"
 }
+```
+
+Using legacy plugin application:
+```gradle
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "com.github.hexomod:MacroPreprocessor:0.8"
+  }
+}
+
+apply plugin: "com.github.hexomod.macro.preprocessor"
 ```
 
 # Usage
@@ -25,29 +43,34 @@ plugin {
 ```gradle
 macroPreprocessorSettings {
     verbose true
-
-    // Default sourcset is automaticaly used
-    //source = [ "src/api/java", "src/main/java" ]
-    //resources = [ "src/api/resources", "src/main/resources" ]
-
-    // Default output
-    //target = "build/preprocessor/macro"
-
-    vars = [ VAR_STRING: "value_string", VAR_BOOL: true, VAR_INT: 1, VAR_DOUBLE: 1.0, DEBUG: true]
+    vars = [VAR_STRING: "value_string", VAR_BOOL: true, VAR_INT: 1, VAR_DOUBLE: 2.0, PROJECT: "Basic", DEBUG: true]
 }
 ```
 
-# Internal test samples
+# Examples
+
 - [basic](samples/basic)
 - [multi-project1](samples/multi/projects/project1)
 - [multi-project2](samples/multi/projects/project2)
 
+
 # Example of Java sources with directives
-In Java the only allowed way to inject directives and to not break work of tools and conpilers - is to use commented space, so that the preprocessor uses it.
+
 ```Java
     //#ifdef DEBUG
     public static boolean DEBUG = true; 
     //#else
     ///public static boolean DEBUG = false; 
     //#endif
+```
+
+
+# Example of resources with directives
+
+```yml
+##ifdef DEBUG
+debug: true
+##else
+debug: false
+##endif
 ```

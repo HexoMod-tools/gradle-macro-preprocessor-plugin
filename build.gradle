@@ -3,12 +3,12 @@ plugins {
     id 'java'
     id 'java-gradle-plugin'
     id 'maven-publish'
-    id 'com.gradle.plugin-publish' version '0.16.0'
+    id 'com.gradle.plugin-publish' version '0.20.0'
     id "com.github.hierynomus.license" version "0.15.0"
 }
 
 group = 'com.github.hexomod'
-version = '0.7'
+version = '0.8'
 
 // Minimum java version
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -25,7 +25,6 @@ tasks.withType(JavaCompile) {
 
 // Repositories for dependencies resolution
 repositories {
-    jcenter()
     mavenCentral()
 }
 
@@ -62,11 +61,12 @@ pluginBundle {
     description = 'A simple java macro preprocessor plugin'
     tags = ['macro', 'preprocessor']
 }
+
 gradlePlugin {
     plugins {
         gradleMacroPreprocessorPlugin {
             id = 'com.github.hexomod.macro.preprocessor'
-            displayName = 'A simple java macro preprocessor plugin'
+            displayName = rootProject.name
             implementationClass = 'com.github.hexomod.macro.PreprocessorPlugin'
         }
     }
