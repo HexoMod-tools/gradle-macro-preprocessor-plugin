@@ -66,6 +66,7 @@ gradlePlugin {
     plugins {
         gradleMacroPreprocessorPlugin {
             id = 'com.github.hexomod.macro.preprocessor'
+            displayName = rootProject.name
             implementationClass = 'com.github.hexomod.macro.PreprocessorPlugin'
         }
     }
