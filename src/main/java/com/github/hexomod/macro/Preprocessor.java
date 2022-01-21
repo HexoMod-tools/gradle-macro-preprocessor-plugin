@@ -63,8 +63,8 @@ public class Preprocessor {
         put("yml",    HASH_KEYWORDS);
     }};
 
-    private Map<String, Object> vars;
-    private boolean remove;
+    private final Map<String, Object> vars;
+    private final boolean remove;
 
     public Preprocessor(Map<String, Object> vars) {
         this(vars, false);

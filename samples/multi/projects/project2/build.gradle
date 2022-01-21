@@ -1,5 +1,3 @@
-apply plugin: 'application'
-apply plugin: 'com.github.hexomod.macro.preprocessor'
 
 buildscript {
     repositories {
@@ -7,12 +5,18 @@ buildscript {
         maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
-        classpath group: 'com.github.hexomod', name: 'MacroPreprocessor', version: '0.4'
+        classpath group: 'com.github.hexomod', name: 'MacroPreprocessor', version: '0.8'
     }
 }
 
+plugins {
+    id 'java'
+    id 'application'
+}
+
+apply plugin: "com.github.hexomod.macro.preprocessor"
+
 repositories {
-    jcenter()
     mavenLocal()
     mavenCentral()
 }
@@ -21,37 +25,36 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
+mainClassName = 'com.github.hexomod.macro.multi.project2.Main'
+
+// Add api sourceSet
 sourceSets {
-    main {
+    api {
         java {
-            srcDir '/src/main/java'
             srcDir '../../core/src/main/java'
         }
         resources {
-            srcDir '/src/main/resources'
             srcDir '../../core/src/main/resources'
         }
     }
 }
 
-mainClassName = 'com.github.hexomod.macro.multi.project2.Main'
+// compile depends on the api sourceSet
+dependencies {
+    compile sourceSets.api.output
+}
+
+// include output of api sourceSet
+jar{
+    from sourceSets.api.output
+}
+
+// Ensure macroPreprocessor is called before the api compiles
+tasks.withType(JavaCompile).configureEach {
+    dependsOn macroPreprocessor
+}
 
 macroPreprocessorSettings {
-
-    //verbose true
-
-    //sources = "src/main/java"
-    //source = project.file("src/api/java").toString()
-    //source = [ "src/api/java",  "src/main/java" ]
-    //source = [ "src/api/java", file("src/main/java").toString() ]
-
-    //resources = "src/main/resources"
-    //resource = project.file("src/api/resources").toString()
-    //resource = [ "src/api/resources",  "src/main/resources" ]
-    //resource = [ "src/api/resources", file("src/main/resources").toString() ]
-
-    //target = "build/preprocessor/macro"
-    //target = file(buildDir.toString() + "/preprocessor/macro")
-
-    vars = [ VAR_STRING: "value_string", VAR_BOOL: true, VAR_INT: 1, VAR_DOUBLE: 1.0, PROJECT: "Project2", DEBUG: true]
+    verbose true
+    vars = [VAR_STRING: "value_string", VAR_BOOL: true, VAR_INT: 1, VAR_DOUBLE: 2.0, PROJECT: "Basic", DEBUG: true]
 }
