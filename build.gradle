@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'com.github.hexomod'
-version = '0.8'
+version = '0.9-SNAPSHOT'
 
 // Minimum java version
 sourceCompatibility = JavaVersion.VERSION_1_8

@@ -5,7 +5,7 @@ buildscript {
         maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
-        classpath group: 'com.github.hexomod', name: 'MacroPreprocessor', version: '0.8'
+        classpath group: 'com.github.hexomod', name: 'MacroPreprocessor', version: '0.9-SNAPSHOT'
     }
 }
 
@@ -47,11 +47,6 @@ dependencies {
 // include output of api sourceSet
 jar{
     from sourceSets.api.output
-}
-
-// Ensure macroPreprocessor is called before the api compiles
-tasks.withType(JavaCompile).configureEach {
-    dependsOn macroPreprocessor
 }
 
 macroPreprocessorSettings {

@@ -21,73 +21,67 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.github.hexomod.macro;
+package com.github.hexomod.macro.tasks;
 
 
+import com.github.hexomod.macro.Preprocessor;
+import com.github.hexomod.macro.PreprocessorExtension;
 import org.apache.commons.io.FileUtils;
-import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.file.SourceDirectorySet;
-import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
+import org.gradle.plugins.ide.eclipse.internal.AfterEvaluateHelper;
 
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 
 @SuppressWarnings({"WeakerAccess","unused"})
-public class PreprocessorTask extends DefaultTask {
+@CacheableTask
+public class PreprocessorResourcesTask extends Copy {
 
-    public static final String TASK_ID = "macroPreprocessor";
+    public static final String TASK_ID = "macroPreprocessorResources";
 
     private final Project project;
     private final PreprocessorExtension extension;
-    private Preprocessor preprocessor;
-
+    private SourceSet sourceSet;
 
     @Inject
-    public PreprocessorTask() {
+    public PreprocessorResourcesTask() {
         this.project = getProject();
         this.extension = project.getExtensions().findByType(PreprocessorExtension.class);
     }
 
+    public SourceSet getSourceSet() {
+        return sourceSet;
+    }
+
+    public void setSourceSet(SourceSet sourceSet) {
+        this.sourceSet = sourceSet;
+    }
+
     @TaskAction
     public void process() throws IOException {
-        log("Starting macro preprocessor");
-
-        // Instantiate macro preprocessor
-        this.preprocessor = new Preprocessor(extension.getVars(), extension.getRemove());
-
-        // Loop through all SourceSets
-        for(SourceSet sourceSet : extension.getSourceSets()) {
-            processSourceSet(sourceSet);
-        }
+        extension.log("Processing resources files ...");
+        // Process sourceSet
+        processSourceSet(sourceSet);
     }
 
     private void processSourceSet(final SourceSet sourceSet) throws IOException {
-        log("  Processing sourceSet : " + sourceSet.getName());
+        extension.log("  Processing sourceSet : " + sourceSet.getName());
 
-        // Resources files
         SourceDirectorySet resourceDirectorySet = sourceSet.getResources();
         Set<File> resDirs = processSourceDirectorySet(resourceDirectorySet, sourceSet.getName());
-
-        // Java files
-        SourceDirectorySet javaDirectorySet = sourceSet.getJava();
-        Set<File> srcDirs = processSourceDirectorySet(javaDirectorySet, sourceSet.getName());
-
-        //
-        sourceSet.getResources().setSrcDirs(Collections.singleton(resDirs));
-        sourceSet.getJava().setSrcDirs(Collections.singleton(srcDirs));
     }
 
     private Set<File> processSourceDirectorySet(final SourceDirectorySet sourceDirectorySet, String sourceSetName) throws IOException {
-        log("    Processing directory : " + sourceDirectorySet.getName());
+        extension.log("    Processing directory : " + sourceDirectorySet.getName());
 
         Set<File> dirs = new LinkedHashSet<>();
+        Preprocessor preprocessor = new Preprocessor(extension.getVars(), extension.getRemove());
 
         for (File sourceDirectory : sourceDirectorySet.getSrcDirs()) {
             String resourceDirName = sourceDirectory.getName();
@@ -99,19 +93,12 @@ public class PreprocessorTask extends DefaultTask {
             dirs.add(processDir);
 
             for (File sourceFile : project.fileTree(sourceDirectory)) {
-                log("    Processing " + sourceFile.toString());
+                extension.log("    Processing " + sourceFile.toString());
                 File processFile = processDir.toPath().resolve(sourceDirectory.toPath().relativize(sourceFile.toPath())).toFile();
                 preprocessor.process(sourceFile, processFile);
             }
         }
 
         return dirs;
-    }
-
-    // Print out a string if verbose is enabled
-    private void log(String msg) {
-        if(this.extension != null && this.extension.getVerbose()) {
-            System.out.println(msg);
-        }
     }
 }

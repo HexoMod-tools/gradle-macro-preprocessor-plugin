@@ -37,7 +37,7 @@ public class PreprocessorExtension {
     /**
      * Name of the extension to use in build.gradle
      */
-    public static final String EXTENSION_NAME = "macroPreprocessorSettings";
+    public static final String NAME = "macroPreprocessorSettings";
 
     /**
      * The current project
@@ -126,5 +126,12 @@ public class PreprocessorExtension {
 
     public void setVars(Map<String, Object> vars) {
         this.vars.putAll(vars);
+    }
+
+    // Print out a string if verbose is enabled
+    public void log(String msg) {
+        if(getVerbose()) {
+            System.out.println(msg);
+        }
     }
 }
