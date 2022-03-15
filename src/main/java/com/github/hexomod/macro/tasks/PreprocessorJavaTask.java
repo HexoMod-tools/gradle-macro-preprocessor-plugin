@@ -91,7 +91,7 @@ public class PreprocessorJavaTask extends SourceTask {
         extension.log("    Processing directory : " + sourceDirectorySet.getName());
 
         Set<File> dirs = new LinkedHashSet<>();
-        Preprocessor preprocessor = new Preprocessor(extension.getVars(), extension.getRemove());
+        Preprocessor preprocessor = new Preprocessor(extension.getVars(), extension.getRemove() || extension.getJava().getRemove());
 
         for (File sourceDirectory : sourceDirectorySet.getSrcDirs()) {
             String resourceDirName = sourceDirectory.getName();

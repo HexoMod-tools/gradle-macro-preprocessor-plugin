@@ -52,6 +52,18 @@ jar{
 }
 
 macroPreprocessorSettings {
-    verbose true
+    verbose = true
+    remove = false
+
+    java {
+        enable = true
+        remove = false
+    }
+
+    resources {
+        enable = true
+        remove = true
+    }
+
     vars = [VAR_STRING: "value_string", VAR_BOOL: true, VAR_INT: 1, VAR_DOUBLE: 2.0, PROJECT: "Basic", DEBUG: true]
 }

@@ -1,8 +1,6 @@
-
 ##if VAR_STRING==string
 string: string
 ##endif
-
 ##if VAR_INT==1
 int: 1
 ##endif

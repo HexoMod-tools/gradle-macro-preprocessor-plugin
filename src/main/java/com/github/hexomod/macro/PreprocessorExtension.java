@@ -23,10 +23,17 @@
  */
 package com.github.hexomod.macro;
 
+import com.github.hexomod.macro.extensions.Java;
+import com.github.hexomod.macro.extensions.Resources;
 import groovy.lang.Closure;
+import org.gradle.api.Action;
+import org.gradle.api.Project;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.tasks.SourceSetContainer;
+import org.gradle.internal.Actions;
+import org.gradle.util.ConfigureUtil;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -42,12 +49,22 @@ public class PreprocessorExtension {
     /**
      * The current project
      */
-    private final ProjectInternal project;
+    private final Project project;
 
     /**
      * Project SourceSet
      */
     private final SourceSetContainer sourceSets;
+
+    /**
+     * Map of variables
+     */
+    private Map<String, Object> vars;
+
+    /**
+     * Directory where files will be processed
+     */
+    private File processDir;
 
     /**
      * Enable logging to console while preprocessing files
@@ -60,47 +77,47 @@ public class PreprocessorExtension {
     private boolean remove;
 
     /**
-     * Directory where files will be processed
+     * java files configuration
      */
-    private File processDir;
+    private final Java java;
 
     /**
-     * Map of variables
+     * resources files configuration
      */
-    private final Map<String, Object> vars;
+    private final Resources resources;
 
 
+    /**
+     * Initialise extension
+     *
+     * @param project the project
+     * @param sourceSets sourceSets to process
+     */
+    @Inject
     public PreprocessorExtension(ProjectInternal project, SourceSetContainer sourceSets) {
         this.project = project;
         this.sourceSets = sourceSets;
-        this.verbose = false;
-        this.processDir = new File(project.getBuildDir(), "preprocessor/macro");
         this.vars = new LinkedHashMap<>();
+        this.processDir = new File(project.getBuildDir(), "preprocessor/macro");
+        this.verbose = false;
+        this.java = new Java();
+        this.resources = new Resources();
     }
 
-    public Object sourceSets(Closure closure) {
-        return sourceSets.configure(closure);
-    }
 
     public SourceSetContainer getSourceSets() {
         return sourceSets;
     }
 
-    public boolean getVerbose() {
-        return verbose;
+
+    public Map<String, Object> getVars() {
+        return this.vars;
     }
 
-    public void setVerbose(boolean verbose) {
-        this.verbose = verbose;
+    public void setVars(Map<String, Object> vars) {
+        this.vars.putAll(vars);
     }
 
-    public boolean getRemove() {
-        return remove;
-    }
-
-    public void setRemove(boolean remove) {
-        this.remove = remove;
-    }
 
     public File getProcessDir() {
         return processDir;
@@ -120,13 +137,50 @@ public class PreprocessorExtension {
         }
     }
 
-    public Map<String, Object> getVars() {
-        return this.vars;
+
+    public boolean getVerbose() {
+        return verbose;
     }
 
-    public void setVars(Map<String, Object> vars) {
-        this.vars.putAll(vars);
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
     }
+
+
+    public boolean getRemove() {
+        return remove;
+    }
+
+    public void setRemove(boolean remove) {
+        this.remove = remove;
+    }
+
+
+    public Java getJava() {
+        return java;
+    }
+
+    public Java java(Closure closure) {
+        return ConfigureUtil.configure(closure, java);
+    }
+
+    public Java java(Action<? super Java> action) {
+        return Actions.with(java, action);
+    }
+
+
+    public Resources getResources() {
+        return resources;
+    }
+
+    public Resources resources(Closure closure) {
+        return ConfigureUtil.configure(closure, resources);
+    }
+
+    public Resources resources(Action<? super Resources> action) {
+        return Actions.with(resources, action);
+    }
+
 
     // Print out a string if verbose is enabled
     public void log(String msg) {

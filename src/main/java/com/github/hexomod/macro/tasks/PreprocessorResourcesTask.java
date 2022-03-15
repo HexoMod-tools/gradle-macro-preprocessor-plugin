@@ -29,8 +29,10 @@ import com.github.hexomod.macro.PreprocessorExtension;
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.Project;
 import org.gradle.api.file.SourceDirectorySet;
-import org.gradle.api.tasks.*;
-import org.gradle.plugins.ide.eclipse.internal.AfterEvaluateHelper;
+import org.gradle.api.tasks.CacheableTask;
+import org.gradle.api.tasks.Copy;
+import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.TaskAction;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -81,7 +83,7 @@ public class PreprocessorResourcesTask extends Copy {
         extension.log("    Processing directory : " + sourceDirectorySet.getName());
 
         Set<File> dirs = new LinkedHashSet<>();
-        Preprocessor preprocessor = new Preprocessor(extension.getVars(), extension.getRemove());
+        Preprocessor preprocessor = new Preprocessor(extension.getVars(), extension.getRemove() || extension.getResources().getRemove());
 
         for (File sourceDirectory : sourceDirectorySet.getSrcDirs()) {
             String resourceDirName = sourceDirectory.getName();

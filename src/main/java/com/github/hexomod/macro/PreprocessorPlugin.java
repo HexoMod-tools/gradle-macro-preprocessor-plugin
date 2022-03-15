@@ -37,7 +37,6 @@ import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.language.jvm.tasks.ProcessResources;
-import org.gradle.plugins.ide.eclipse.internal.AfterEvaluateHelper;
 import org.gradle.util.GUtil;
 
 import java.io.File;
@@ -77,10 +76,14 @@ public class PreprocessorPlugin implements Plugin<Project> {
 
     private void configurePreprocessor(Project project, final PreprocessorExtension extension) {
         for(SourceSet sourceSet : extension.getSourceSets()) {
-            final JavaCompile compileTask = (JavaCompile) project.getTasks().findByName(sourceSet.getCompileJavaTaskName());
-            final ProcessResources resourceTask = (ProcessResources) project.getTasks().findByName(sourceSet.getProcessResourcesTaskName());
-            registerPreprocessorTask(project, extension, sourceSet, compileTask).get();
-            registerPreprocessorTask(project, extension, sourceSet, resourceTask).get();
+            if(extension.getJava().getEnable()) {
+                final JavaCompile compileTask = (JavaCompile) project.getTasks().findByName(sourceSet.getCompileJavaTaskName());
+                registerPreprocessorTask(project, extension, sourceSet, compileTask).get();
+            }
+            if(extension.getResources().getEnable()) {
+                final ProcessResources resourceTask = (ProcessResources) project.getTasks().findByName(sourceSet.getProcessResourcesTaskName());
+                registerPreprocessorTask(project, extension, sourceSet, resourceTask).get();
+            }
         }
     }
 
