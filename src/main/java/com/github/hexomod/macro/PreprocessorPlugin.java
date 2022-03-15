@@ -91,12 +91,9 @@ public class PreprocessorPlugin implements Plugin<Project> {
         return project.getTasks().register(PreprocessorJavaTask.TASK_ID + (sourceSet.getName() == "main" ? "" : GUtil.toCamelCase(sourceSet.getName())), PreprocessorJavaTask.class, preprocessor -> {
             preprocessor.setDescription("Apply macro to source code.");
             preprocessor.setGroup(BasePlugin.BUILD_GROUP);
-
-            preprocessor.setSource(compileTask.getSource());
+            preprocessor.setSource(sourceSet.getAllJava());
             preprocessor.setSourceSet(sourceSet);
             preprocessor.setDestinationDir(new File(new File(extension.getProcessDir(), sourceSet.getName()), "java"));
-
-            compileTask.setSource(preprocessor.getOutputs());
             compileTask.dependsOn(preprocessor);
         });
     }
@@ -105,12 +102,9 @@ public class PreprocessorPlugin implements Plugin<Project> {
         return project.getTasks().register(PreprocessorResourcesTask.TASK_ID + (sourceSet.getName() == "main" ? "" : GUtil.toCamelCase(sourceSet.getName())), PreprocessorResourcesTask.class, preprocessor -> {
             preprocessor.setDescription("Apply macro to resources files.");
             preprocessor.setGroup(BasePlugin.BUILD_GROUP);
-
-            preprocessor.from(resourcesTask.getSource());
+            preprocessor.from(sourceSet.getResources());
             preprocessor.setSourceSet(sourceSet);
             preprocessor.into(new File(new File(extension.getProcessDir(), sourceSet.getName()), "resources"));
-
-            resourcesTask.from(preprocessor.getDestinationDir());
             resourcesTask.dependsOn(preprocessor);
         });
     }

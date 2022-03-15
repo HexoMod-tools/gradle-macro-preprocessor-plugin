@@ -37,6 +37,7 @@ import org.gradle.api.tasks.TaskAction;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -68,15 +69,15 @@ public class PreprocessorResourcesTask extends Copy {
     @TaskAction
     public void process() throws IOException {
         extension.log("Processing resources files ...");
-        // Process sourceSet
-        processSourceSet(sourceSet);
+        processSourceSet();
     }
 
-    private void processSourceSet(final SourceSet sourceSet) throws IOException {
+    private void processSourceSet() throws IOException {
         extension.log("  Processing sourceSet : " + sourceSet.getName());
 
         SourceDirectorySet resourceDirectorySet = sourceSet.getResources();
         Set<File> resDirs = processSourceDirectorySet(resourceDirectorySet, sourceSet.getName());
+        sourceSet.getResources().setSrcDirs(Collections.singleton(resDirs));
     }
 
     private Set<File> processSourceDirectorySet(final SourceDirectorySet sourceDirectorySet, String sourceSetName) throws IOException {

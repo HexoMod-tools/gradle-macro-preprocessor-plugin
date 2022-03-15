@@ -34,6 +34,7 @@ import org.gradle.api.tasks.*;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -76,15 +77,15 @@ public class PreprocessorJavaTask extends SourceTask {
     @TaskAction
     public void process() throws IOException {
         extension.log("Processing java files ...");
-        // Process sourceSet
-        processSourceSet(sourceSet);
+        processSourceSet();
     }
 
-    private void processSourceSet(final SourceSet sourceSet) throws IOException {
+    private void processSourceSet() throws IOException {
         extension.log("  Processing sourceSet : " + sourceSet.getName());
 
         SourceDirectorySet javaDirectorySet = sourceSet.getJava();
         Set<File> srcDirs = processSourceDirectorySet(javaDirectorySet, sourceSet.getName());
+        sourceSet.getJava().setSrcDirs(Collections.singleton(srcDirs));
     }
 
     private Set<File> processSourceDirectorySet(final SourceDirectorySet sourceDirectorySet, String sourceSetName) throws IOException {
