@@ -30,6 +30,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -76,10 +77,36 @@ public class Preprocessor {
     }
 
     public void process(File inFile, File outFile) throws IOException {
+        Map<String, String> keywords = null;
+        // check if the file extension is a known extension
         String fileExtension = FilenameUtils.getExtension(inFile.getName());
+        boolean known = EXTENSION_KEYWORDS.containsKey(fileExtension);
+        if(known) {
+            keywords = EXTENSION_KEYWORDS.get(fileExtension);
+        }
+        // if the extension is not know, then try to find one of the keywords in the file
+        String fileString = FileUtils.readFileToString(inFile, StandardCharsets.UTF_8);
+        if(!known) {
+            for(String slash : SLASH_KEYWORDS.values()) {
+                if(slash != "///" && fileString.contains(slash)) {
+                    known = true;
+                    keywords = SLASH_KEYWORDS;
+                    break;
+                }
+            }
+        }
+        if(!known) {
+            for(String slash : HASH_KEYWORDS.values()) {
+                if(slash != "###" && fileString.contains(slash)) {
+                    known = true;
+                    keywords = HASH_KEYWORDS;
+                    break;
+                }
+            }
+        }
         // First check if the file need to be processed
         // If not, the file is just copied to its destination
-        if(!EXTENSION_KEYWORDS.containsKey(fileExtension)) {
+        if(!known) {
             if (!inFile.equals(outFile)) {
                 FileUtils.copyFile(inFile, outFile);
             }
@@ -91,7 +118,7 @@ public class Preprocessor {
                 // Convert input file to list of lines
                 List<String> lines = FileUtils.readLines(inFile, StandardCharsets.UTF_8);
                 // Process lines
-                lines = processLines(lines, EXTENSION_KEYWORDS.get(fileExtension));
+                lines = processLines(lines, keywords);
                 // Create parent folder if needed
                 FileUtils.forceMkdirParent(outFile);
                 // Write output file

@@ -5,11 +5,11 @@ A simple macro preprocessor for java
 
 ## Supported macros
 
-`#ifdef`  
-`#if`  
-`#elseif`  
-`#else`  
-`#endif`  
+`//#ifdef`      or      `##ifdef`  
+`//#if`         or      `##if`  
+`//#elseif`     or      `##elseif`  
+`//#else`       or      `##else`  
+`//#endif`      or      `##endif`  
 
 # How to use
 
