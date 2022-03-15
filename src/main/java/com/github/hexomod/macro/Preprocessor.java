@@ -80,7 +80,9 @@ public class Preprocessor {
         // First check if the file need to be processed
         // If not, the file is just copied to its destination
         if(!EXTENSION_KEYWORDS.containsKey(fileExtension)) {
-            FileUtils.copyFile(inFile, outFile);
+            if (!inFile.equals(outFile)) {
+                FileUtils.copyFile(inFile, outFile);
+            }
         }
         // If yes, the file is processed
         else {

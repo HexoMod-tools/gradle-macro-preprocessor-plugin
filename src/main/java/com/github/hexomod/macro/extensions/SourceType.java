@@ -23,11 +23,40 @@
  */
 package com.github.hexomod.macro.extensions;
 
-public class Java extends SourceType {
-    public Java() {
-        super();
-        setEnable(true);
-        setInPlace(false);
-        setRemove(false);
+public abstract class SourceType {
+
+    private boolean enable;
+    private boolean inPlace;
+    private boolean remove;
+
+
+    public SourceType() {
+        enable = true;
+        inPlace = false;
+        remove = false;
+    }
+
+    public boolean getEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
+    }
+
+    public boolean getInPlace() {
+        return inPlace;
+    }
+
+    public void setInPlace(boolean inPlace) {
+        this.inPlace = inPlace;
+    }
+
+    public boolean getRemove() {
+        return remove;
+    }
+
+    public void setRemove(boolean remove) {
+        this.remove = remove;
     }
 }

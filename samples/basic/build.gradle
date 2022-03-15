@@ -52,18 +52,21 @@ jar{
 }
 
 macroPreprocessorSettings {
-    verbose = true
-    remove = false
+    verbose = true      // default: false
+    inPlace = false     // default: false
+    remove = false      // default: false
 
     java {
-        enable = true
-        remove = false
+        enable = true       // default: true
+        inPlace = true      // default: false
+        remove = false      // default: false
     }
 
     resources {
-        enable = true
-        remove = true
+        enable = true       // default: true
+        inPlace = true      // default: true
+        remove = true       // default: true
     }
 
-    vars = [VAR_STRING: "value_string", VAR_BOOL: true, VAR_INT: 1, VAR_DOUBLE: 2.0, PROJECT: "Basic", DEBUG: true]
+    vars = [VAR_STRING: "value_string", VAR_BOOL: true, VAR_INT: 1, VAR_DOUBLE: 2.0, PROJECT: "Basic", DEBUG: false]
 }

@@ -25,6 +25,7 @@ package com.github.hexomod.macro;
 
 import com.github.hexomod.macro.extensions.Java;
 import com.github.hexomod.macro.extensions.Resources;
+import com.github.hexomod.macro.extensions.SourceType;
 import groovy.lang.Closure;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
@@ -39,7 +40,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @SuppressWarnings({"WeakerAccess","unused"})
-public class PreprocessorExtension {
+public class PreprocessorExtension extends SourceType  {
 
     /**
      * Name of the extension to use in build.gradle
@@ -70,11 +71,6 @@ public class PreprocessorExtension {
      * Enable logging to console while preprocessing files
      */
     private boolean verbose;
-
-    /**
-     * Remove commented lines
-     */
-    private boolean remove;
 
     /**
      * java files configuration
@@ -144,15 +140,6 @@ public class PreprocessorExtension {
 
     public void setVerbose(boolean verbose) {
         this.verbose = verbose;
-    }
-
-
-    public boolean getRemove() {
-        return remove;
-    }
-
-    public void setRemove(boolean remove) {
-        this.remove = remove;
     }
 
 

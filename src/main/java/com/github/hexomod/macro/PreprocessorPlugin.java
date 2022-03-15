@@ -76,11 +76,11 @@ public class PreprocessorPlugin implements Plugin<Project> {
 
     private void configurePreprocessor(Project project, final PreprocessorExtension extension) {
         for(SourceSet sourceSet : extension.getSourceSets()) {
-            if(extension.getJava().getEnable()) {
+            if(extension.getEnable() && extension.getJava().getEnable()) {
                 final JavaCompile compileTask = (JavaCompile) project.getTasks().findByName(sourceSet.getCompileJavaTaskName());
                 registerPreprocessorTask(project, extension, sourceSet, compileTask).get();
             }
-            if(extension.getResources().getEnable()) {
+            if(extension.getEnable() && extension.getResources().getEnable()) {
                 final ProcessResources resourceTask = (ProcessResources) project.getTasks().findByName(sourceSet.getProcessResourcesTaskName());
                 registerPreprocessorTask(project, extension, sourceSet, resourceTask).get();
             }

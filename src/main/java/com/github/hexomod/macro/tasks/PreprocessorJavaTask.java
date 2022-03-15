@@ -92,6 +92,7 @@ public class PreprocessorJavaTask extends SourceTask {
 
         Set<File> dirs = new LinkedHashSet<>();
         Preprocessor preprocessor = new Preprocessor(extension.getVars(), extension.getRemove() || extension.getJava().getRemove());
+        Preprocessor inPlacePreprocessor = new Preprocessor(extension.getVars(), false);
 
         for (File sourceDirectory : sourceDirectorySet.getSrcDirs()) {
             String resourceDirName = sourceDirectory.getName();
@@ -106,6 +107,10 @@ public class PreprocessorJavaTask extends SourceTask {
                 extension.log("    Processing " + sourceFile.toString());
                 File processFile = processDir.toPath().resolve(sourceDirectory.toPath().relativize(sourceFile.toPath())).toFile();
                 preprocessor.process(sourceFile, processFile);
+
+                if(extension.getInPlace() || extension.getResources().getInPlace()) {
+                    inPlacePreprocessor.process(sourceFile, sourceFile);
+                }
             }
         }
 

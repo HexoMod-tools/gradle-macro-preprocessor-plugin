@@ -84,6 +84,7 @@ public class PreprocessorResourcesTask extends Copy {
 
         Set<File> dirs = new LinkedHashSet<>();
         Preprocessor preprocessor = new Preprocessor(extension.getVars(), extension.getRemove() || extension.getResources().getRemove());
+        Preprocessor inPlacePreprocessor = new Preprocessor(extension.getVars(), false);
 
         for (File sourceDirectory : sourceDirectorySet.getSrcDirs()) {
             String resourceDirName = sourceDirectory.getName();
@@ -98,6 +99,10 @@ public class PreprocessorResourcesTask extends Copy {
                 extension.log("    Processing " + sourceFile.toString());
                 File processFile = processDir.toPath().resolve(sourceDirectory.toPath().relativize(sourceFile.toPath())).toFile();
                 preprocessor.process(sourceFile, processFile);
+
+                if(extension.getInPlace() || extension.getResources().getInPlace()) {
+                    inPlacePreprocessor.process(sourceFile, sourceFile);
+                }
             }
         }
 

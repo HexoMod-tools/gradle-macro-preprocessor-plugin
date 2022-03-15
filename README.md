@@ -42,7 +42,22 @@ apply plugin: "com.github.hexomod.macro.preprocessor"
 
 ```gradle
 macroPreprocessorSettings {
-    verbose true
+    verbose = true      // default: false
+    inPlace = false     // default: false
+    remove = false      // default: false
+
+    java {
+        enable = true       // default: true
+        inPlace = true      // default: false
+        remove = false      // default: false
+    }
+
+    resources {
+        enable = true       // default: true
+        inPlace = true      // default: true
+        remove = true       // default: true
+    }
+    
     vars = [VAR_STRING: "value_string", VAR_BOOL: true, VAR_INT: 1, VAR_DOUBLE: 2.0, PROJECT: "Basic", DEBUG: true]
 }
 ```

@@ -24,30 +24,11 @@
 package com.github.hexomod.macro.extensions;
 
 
-public class Resources {
-
-    private boolean enable;
-    private boolean remove;
-
-
+public class Resources extends SourceType {
     public Resources() {
-        enable = true;
-        remove = false;
-    }
-
-    public boolean getEnable() {
-        return enable;
-    }
-
-    public void setEnable(boolean enable) {
-        this.enable = enable;
-    }
-
-    public boolean getRemove() {
-        return remove;
-    }
-
-    public void setRemove(boolean remove) {
-        this.remove = remove;
+        super();
+        setEnable(true);
+        setInPlace(true);
+        setRemove(true);
     }
 }
