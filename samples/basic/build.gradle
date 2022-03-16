@@ -52,7 +52,7 @@ jar{
 }
 
 macroPreprocessorSettings {
-    verbose = true      // default: false
+    verbose = false      // default: false
     inPlace = false     // default: false
     remove = false      // default: false
 

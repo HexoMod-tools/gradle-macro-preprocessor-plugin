@@ -26,7 +26,6 @@ package com.github.hexomod.macro.tasks;
 
 import com.github.hexomod.macro.Preprocessor;
 import com.github.hexomod.macro.PreprocessorExtension;
-import org.apache.commons.io.FileUtils;
 import org.gradle.api.Project;
 import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.tasks.*;
@@ -84,8 +83,7 @@ public class PreprocessorJavaTask extends SourceTask {
         extension.log("  Processing sourceSet : " + sourceSet.getName());
 
         SourceDirectorySet javaDirectorySet = sourceSet.getJava();
-        Set<File> srcDirs = processSourceDirectorySet(javaDirectorySet, sourceSet.getName());
-        sourceSet.getJava().setSrcDirs(Collections.singleton(srcDirs));
+        /*Set<File> srcDirs =*/ processSourceDirectorySet(javaDirectorySet, sourceSet.getName());
     }
 
     private Set<File> processSourceDirectorySet(final SourceDirectorySet sourceDirectorySet, String sourceSetName) throws IOException {
@@ -98,15 +96,12 @@ public class PreprocessorJavaTask extends SourceTask {
         for (File sourceDirectory : sourceDirectorySet.getSrcDirs()) {
             String resourceDirName = sourceDirectory.getName();
 
-            File processDir = new File(extension.getProcessDir(), sourceSetName);
-            processDir = new File(processDir, resourceDirName);
-            FileUtils.forceMkdir(processDir);
-
-            dirs.add(processDir);
+            File destination = getDestinationDir();
+            dirs.add(destination);
 
             for (File sourceFile : project.fileTree(sourceDirectory)) {
                 extension.log("    Processing " + sourceFile.toString());
-                File processFile = processDir.toPath().resolve(sourceDirectory.toPath().relativize(sourceFile.toPath())).toFile();
+                File processFile = destination.toPath().resolve(sourceDirectory.toPath().relativize(sourceFile.toPath())).toFile();
                 preprocessor.process(sourceFile, processFile);
 
                 if(extension.getInPlace() || extension.getResources().getInPlace()) {

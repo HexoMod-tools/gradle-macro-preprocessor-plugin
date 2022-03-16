@@ -61,7 +61,7 @@ public class PreprocessorPlugin implements Plugin<Project> {
 
         // Configure preprocessors
         project.afterEvaluate( root -> {
-            configurePreprocessor(project, extension);
+            configurePreprocessors(project, extension);
         });
     }
 
@@ -74,38 +74,60 @@ public class PreprocessorPlugin implements Plugin<Project> {
                 , sourceSets);
     }
 
-    private void configurePreprocessor(Project project, final PreprocessorExtension extension) {
+    private void configurePreprocessors(Project project, final PreprocessorExtension extension) {
         for(SourceSet sourceSet : extension.getSourceSets()) {
             if(extension.getEnable() && extension.getJava().getEnable()) {
                 final JavaCompile compileTask = (JavaCompile) project.getTasks().findByName(sourceSet.getCompileJavaTaskName());
-                registerPreprocessorTask(project, extension, sourceSet, compileTask).get();
+                registerJavaTask(project, extension, sourceSet, compileTask).get();
             }
             if(extension.getEnable() && extension.getResources().getEnable()) {
                 final ProcessResources resourceTask = (ProcessResources) project.getTasks().findByName(sourceSet.getProcessResourcesTaskName());
-                registerPreprocessorTask(project, extension, sourceSet, resourceTask).get();
+                registerResourcesTask(project, extension, sourceSet, resourceTask).get();
             }
         }
     }
 
-    private TaskProvider<PreprocessorJavaTask> registerPreprocessorTask(Project project, PreprocessorExtension extension, SourceSet sourceSet, JavaCompile compileTask) {
+    private TaskProvider<PreprocessorJavaTask> registerJavaTask(Project project, PreprocessorExtension extension, SourceSet sourceSet, JavaCompile compileTask) {
         return project.getTasks().register(PreprocessorJavaTask.TASK_ID + (sourceSet.getName() == "main" ? "" : GUtil.toCamelCase(sourceSet.getName())), PreprocessorJavaTask.class, preprocessor -> {
             preprocessor.setDescription("Apply macro to source code.");
             preprocessor.setGroup(BasePlugin.BUILD_GROUP);
-            preprocessor.setSource(sourceSet.getAllJava());
             preprocessor.setSourceSet(sourceSet);
-            preprocessor.setDestinationDir(new File(new File(extension.getProcessDir(), sourceSet.getName()), "java"));
+
+            File destination = new File(new File(extension.getProcessDir(),"java"), sourceSet.getName());
+
+            preprocessor.setSource(sourceSet.getAllJava());
+            preprocessor.setDestinationDir(destination);
+
+            compileTask.setSource(destination);
             compileTask.dependsOn(preprocessor);
+
+            preprocessor.doFirst( task -> {
+            });
+
+            preprocessor.doLast( task -> {
+            });
         });
     }
 
-    private TaskProvider<PreprocessorResourcesTask> registerPreprocessorTask(Project project, PreprocessorExtension extension, SourceSet sourceSet, ProcessResources resourcesTask) {
+    private TaskProvider<PreprocessorResourcesTask> registerResourcesTask(Project project, PreprocessorExtension extension, SourceSet sourceSet, ProcessResources resourcesTask) {
         return project.getTasks().register(PreprocessorResourcesTask.TASK_ID + (sourceSet.getName() == "main" ? "" : GUtil.toCamelCase(sourceSet.getName())), PreprocessorResourcesTask.class, preprocessor -> {
             preprocessor.setDescription("Apply macro to resources files.");
             preprocessor.setGroup(BasePlugin.BUILD_GROUP);
-            preprocessor.from(sourceSet.getResources());
             preprocessor.setSourceSet(sourceSet);
-            preprocessor.into(new File(new File(extension.getProcessDir(), sourceSet.getName()), "resources"));
+
+            File destination = new File(new File(extension.getProcessDir(),"resources"), sourceSet.getName());
+
+            preprocessor.from(sourceSet.getResources().getSrcDirs());
+            preprocessor.setDestinationDir(destination);
+
+            resourcesTask.from(preprocessor.getDestinationDir());
             resourcesTask.dependsOn(preprocessor);
+
+            preprocessor.doFirst( task -> {
+            });
+
+            preprocessor.doLast( task -> {
+            });
         });
     }
 

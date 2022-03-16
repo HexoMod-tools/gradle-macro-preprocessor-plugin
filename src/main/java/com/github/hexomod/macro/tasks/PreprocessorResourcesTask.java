@@ -26,18 +26,15 @@ package com.github.hexomod.macro.tasks;
 
 import com.github.hexomod.macro.Preprocessor;
 import com.github.hexomod.macro.PreprocessorExtension;
-import org.apache.commons.io.FileUtils;
 import org.gradle.api.Project;
 import org.gradle.api.file.SourceDirectorySet;
-import org.gradle.api.tasks.CacheableTask;
-import org.gradle.api.tasks.Copy;
-import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
+import org.gradle.language.base.internal.tasks.SimpleStaleClassCleaner;
+import org.gradle.language.base.internal.tasks.StaleClassCleaner;
 
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -50,7 +47,11 @@ public class PreprocessorResourcesTask extends Copy {
 
     private final Project project;
     private final PreprocessorExtension extension;
+
     private SourceSet sourceSet;
+
+    @OutputDirectory
+    File destinationDir;
 
     @Inject
     public PreprocessorResourcesTask() {
@@ -66,6 +67,13 @@ public class PreprocessorResourcesTask extends Copy {
         this.sourceSet = sourceSet;
     }
 
+    protected void copy() {
+        StaleClassCleaner cleaner = new SimpleStaleClassCleaner(this.getOutputs());
+        cleaner.addDirToClean(this.getDestinationDir());
+        cleaner.execute();
+        super.copy();
+    }
+
     @TaskAction
     public void process() throws IOException {
         extension.log("Processing resources files ...");
@@ -76,8 +84,7 @@ public class PreprocessorResourcesTask extends Copy {
         extension.log("  Processing sourceSet : " + sourceSet.getName());
 
         SourceDirectorySet resourceDirectorySet = sourceSet.getResources();
-        Set<File> resDirs = processSourceDirectorySet(resourceDirectorySet, sourceSet.getName());
-        sourceSet.getResources().setSrcDirs(Collections.singleton(resDirs));
+        /*Set<File> resDirs =*/ processSourceDirectorySet(resourceDirectorySet, sourceSet.getName());
     }
 
     private Set<File> processSourceDirectorySet(final SourceDirectorySet sourceDirectorySet, String sourceSetName) throws IOException {
@@ -90,15 +97,12 @@ public class PreprocessorResourcesTask extends Copy {
         for (File sourceDirectory : sourceDirectorySet.getSrcDirs()) {
             String resourceDirName = sourceDirectory.getName();
 
-            File processDir = new File(extension.getProcessDir(), sourceSetName);
-            processDir = new File(processDir, resourceDirName);
-            FileUtils.forceMkdir(processDir);
-
-            dirs.add(processDir);
+            File destination = getDestinationDir();
+            dirs.add(destination);
 
             for (File sourceFile : project.fileTree(sourceDirectory)) {
                 extension.log("    Processing " + sourceFile.toString());
-                File processFile = processDir.toPath().resolve(sourceDirectory.toPath().relativize(sourceFile.toPath())).toFile();
+                File processFile = destination.toPath().resolve(sourceDirectory.toPath().relativize(sourceFile.toPath())).toFile();
                 preprocessor.process(sourceFile, processFile);
 
                 if(extension.getInPlace() || extension.getResources().getInPlace()) {
