@@ -33,7 +33,6 @@ import org.gradle.api.tasks.*;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 

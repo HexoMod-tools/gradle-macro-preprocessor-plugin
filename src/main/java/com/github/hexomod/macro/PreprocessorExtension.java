@@ -30,7 +30,6 @@ import groovy.lang.Closure;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.internal.project.ProjectInternal;
-import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.internal.Actions;
 import org.gradle.util.ConfigureUtil;
 
@@ -51,11 +50,6 @@ public class PreprocessorExtension extends SourceType  {
      * The current project
      */
     private final Project project;
-
-    /**
-     * Project SourceSet
-     */
-    private final SourceSetContainer sourceSets;
 
     /**
      * Map of variables
@@ -87,22 +81,15 @@ public class PreprocessorExtension extends SourceType  {
      * Initialise extension
      *
      * @param project the project
-     * @param sourceSets sourceSets to process
      */
     @Inject
-    public PreprocessorExtension(ProjectInternal project, SourceSetContainer sourceSets) {
+    public PreprocessorExtension(ProjectInternal project) {
         this.project = project;
-        this.sourceSets = sourceSets;
         this.vars = new LinkedHashMap<>();
         this.processDir = new File(project.getBuildDir(), "preprocessor/macro");
         this.verbose = false;
         this.java = new Java();
         this.resources = new Resources();
-    }
-
-
-    public SourceSetContainer getSourceSets() {
-        return sourceSets;
     }
 
 
