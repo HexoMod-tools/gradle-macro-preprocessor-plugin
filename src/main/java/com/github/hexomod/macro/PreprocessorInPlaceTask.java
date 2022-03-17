@@ -21,96 +21,68 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.github.hexomod.macro.tasks;
+package com.github.hexomod.macro;
 
-
-import com.github.hexomod.macro.Preprocessor;
-import com.github.hexomod.macro.PreprocessorExtension;
+import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.file.SourceDirectorySet;
-import org.gradle.api.tasks.*;
-import org.gradle.language.base.internal.tasks.SimpleStaleClassCleaner;
-import org.gradle.language.base.internal.tasks.StaleClassCleaner;
+import org.gradle.api.plugins.JavaPluginConvention;
+import org.gradle.api.tasks.CacheableTask;
+import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.TaskAction;
 
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
-
-@SuppressWarnings({"WeakerAccess","unused"})
+@SuppressWarnings({"WeakerAccess", "unused"})
 @CacheableTask
-public class PreprocessorResourcesTask extends Copy {
+public class PreprocessorInPlaceTask extends DefaultTask {
 
-    public static final String TASK_ID = "macroPreprocessorResources";
+    public static final String TASK_ID = "macroPreprocessorInPlace";
 
     private final Project project;
     private final PreprocessorExtension extension;
 
-    private SourceSet sourceSet;
-
-    @OutputDirectory
-    File destinationDir;
-
     @Inject
-    public PreprocessorResourcesTask() {
+    public PreprocessorInPlaceTask() {
         this.project = getProject();
         this.extension = project.getExtensions().findByType(PreprocessorExtension.class);
     }
 
-    public SourceSet getSourceSet() {
-        return sourceSet;
-    }
-
-    public void setSourceSet(SourceSet sourceSet) {
-        this.sourceSet = sourceSet;
-    }
-
-    protected void copy() {
-        StaleClassCleaner cleaner = new SimpleStaleClassCleaner(this.getOutputs());
-        cleaner.addDirToClean(this.getDestinationDir());
-        cleaner.execute();
-        super.copy();
-    }
-
     @TaskAction
     public void process() throws IOException {
-        extension.log("Processing resources files ...");
-        processSourceSet();
+        extension.log("Processing files ...");
+        // Loop through all SourceSets
+        for (SourceSet sourceSet : project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets()) {
+            processSourceSet(sourceSet);
+        }
     }
 
-    private void processSourceSet() throws IOException {
+    private void processSourceSet(final SourceSet sourceSet) throws IOException {
         extension.log("  Processing sourceSet : " + sourceSet.getName());
 
-        SourceDirectorySet resourceDirectorySet = sourceSet.getResources();
-        /*Set<File> resDirs =*/ processSourceDirectorySet(resourceDirectorySet, sourceSet.getName());
+        // Java files
+        if (extension.getInPlace() || extension.getResources().getInPlace()) {
+            processSourceDirectorySet(sourceSet.getJava());
+        }
+
+        // Resources files
+        if (extension.getInPlace() || extension.getResources().getInPlace()) {
+            processSourceDirectorySet(sourceSet.getResources());
+        }
     }
 
-    private Set<File> processSourceDirectorySet(final SourceDirectorySet sourceDirectorySet, String sourceSetName) throws IOException {
+    private void processSourceDirectorySet(final SourceDirectorySet sourceDirectorySet) throws IOException {
         extension.log("    Processing directory : " + sourceDirectorySet.getName());
 
-        Set<File> dirs = new LinkedHashSet<>();
-        Preprocessor preprocessor = new Preprocessor(extension.getVars(), extension.getRemove() || extension.getResources().getRemove());
         Preprocessor inPlacePreprocessor = new Preprocessor(extension.getVars(), false);
 
         for (File sourceDirectory : sourceDirectorySet.getSrcDirs()) {
-            String resourceDirName = sourceDirectory.getName();
-
-            File destination = getDestinationDir();
-            dirs.add(destination);
-
             for (File sourceFile : project.fileTree(sourceDirectory)) {
                 extension.log("    Processing " + sourceFile.toString());
-                File processFile = destination.toPath().resolve(sourceDirectory.toPath().relativize(sourceFile.toPath())).toFile();
-                preprocessor.process(sourceFile, processFile);
-
-                if(extension.getInPlace() || extension.getResources().getInPlace()) {
-                    inPlacePreprocessor.process(sourceFile, sourceFile);
-                }
+                inPlacePreprocessor.process(sourceFile, sourceFile);
             }
         }
-
-        return dirs;
     }
 }

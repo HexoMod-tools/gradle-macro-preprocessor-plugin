@@ -4,11 +4,11 @@ public class Greeting {
     public static String getGreeting() {
         String message = "";
 
-        //#ifdef DEBUG
+        //#if DEBUG == true
             message += "DEBUG is defined" + "\n";
 
             //#if PROJECT==Project1
-            /// message += "PROJECT: Project1" + "\n";
+            message += "PROJECT: Project1" + "\n";
             //#endif
 
             //#if PROJECT==Project2
@@ -43,8 +43,12 @@ public class Greeting {
             message += "VAR_BOOL is true and VAR_INT equal 1" + "\n";
             //#endif
         //#else
-            /// // Just say hello to the world
-            /// message = "Hello world";
+        /// // Just say hello
+        //#if GRADLE==true
+        /// message = "Hello @GRADLE@";
+        //#else
+        /// message = "Hello @HELLO@";
+        //#endif
         //#endif DEBUG
 
         return message;

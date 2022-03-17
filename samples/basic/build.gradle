@@ -6,6 +6,7 @@ buildscript {
     }
     dependencies {
         classpath group: 'com.github.hexomod', name: 'MacroPreprocessor', version: '0.9-SNAPSHOT'
+        classpath group: 'com.github.hexomod', name: 'ReplaceTokenPreprocessor', version: '0.4-SNAPSHOT'
     }
 }
 
@@ -15,6 +16,7 @@ plugins {
 }
 
 apply plugin: "com.github.hexomod.macro.preprocessor"
+apply plugin: "com.github.hexomod.replace.token.preprocessor"
 
 repositories {
     mavenLocal()
@@ -68,5 +70,10 @@ macroPreprocessorSettings {
         remove = true       // default: true
     }
 
-    vars = [VAR_STRING: "value_string", VAR_BOOL: true, VAR_INT: 1, VAR_DOUBLE: 2.0, PROJECT: "Basic", DEBUG: false]
+    vars = [VAR_STRING: "value_string", VAR_BOOL: true, VAR_INT: 1, VAR_DOUBLE: 2.0, PROJECT: "Basic", DEBUG: true, GRADLE: true]
+}
+
+replaceTokenPreprocessorSettings {
+    replace '@HELLO@': 'world'
+    replace '@GRADLE@': 'gradle'
 }

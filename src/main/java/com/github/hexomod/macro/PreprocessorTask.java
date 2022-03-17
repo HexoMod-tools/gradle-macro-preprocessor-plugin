@@ -34,20 +34,21 @@ import org.gradle.util.GUtil;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.Collections;
 
 
-@SuppressWarnings({"WeakerAccess","unused"})
+@SuppressWarnings({"WeakerAccess", "unused"})
 @CacheableTask
 public class PreprocessorTask extends Copy {
 
     public static final String TASK_ID = "macroPreprocessor";
     public static final String TASK_RESOURCE_SUFFIX = "Resource";
     public static final String TASK_JAVA_SUFFIX = "Java";
+
     public static String getResourceTaskName(SourceSet sourceSet) {
         return TASK_ID + (sourceSet.getName() == "main" ? "" : GUtil.toCamelCase(sourceSet.getName())) + TASK_RESOURCE_SUFFIX;
     }
+
     public static String getJavaTaskName(SourceSet sourceSet) {
         return TASK_ID + (sourceSet.getName() == "main" ? "" : GUtil.toCamelCase(sourceSet.getName())) + TASK_JAVA_SUFFIX;
     }
@@ -69,7 +70,7 @@ public class PreprocessorTask extends Copy {
     }
 
     protected void copy() {
-        if(sourceSet != null) {
+        if (sourceSet != null) {
             extension.log("Copying files ...");
             StaleClassCleaner cleaner = new SimpleStaleClassCleaner(this.getOutputs());
             cleaner.addDirToClean(this.getDestinationDir());
@@ -80,7 +81,7 @@ public class PreprocessorTask extends Copy {
 
     @TaskAction
     public void process() throws IOException {
-        if(sourceSet != null) {
+        if (sourceSet != null) {
             extension.log("Processing files ...");
             processSourceSet();
         }
@@ -89,33 +90,27 @@ public class PreprocessorTask extends Copy {
     private void processSourceSet() throws IOException {
         extension.log("  Processing sourceSet : " + sourceSet.getName());
 
-        if(getName().equals(getResourceTaskName(sourceSet))) {
-            SourceDirectorySet resourceDirectorySet = sourceSet.getResources();
-            processSourceDirectorySet(resourceDirectorySet, extension.getRemove() || extension.getResources().getRemove());
+        if (getName().equals(getJavaTaskName(sourceSet))) {
+            processSourceDirectorySet(sourceSet.getJava(), extension.getRemove() || extension.getJava().getRemove());
+            sourceSet.getJava().setSrcDirs(Collections.singletonList(getDestinationDir()));
         }
 
-        if(getName().equals(getJavaTaskName(sourceSet))) {
-            SourceDirectorySet resourceDirectorySet = sourceSet.getJava();
-            processSourceDirectorySet(resourceDirectorySet, extension.getRemove() || extension.getJava().getRemove());
+        if (getName().equals(getResourceTaskName(sourceSet))) {
+            processSourceDirectorySet(sourceSet.getResources(), extension.getRemove() || extension.getResources().getRemove());
+            sourceSet.getResources().setSrcDirs(Collections.singletonList(getDestinationDir()));
         }
     }
 
     private void processSourceDirectorySet(final SourceDirectorySet sourceDirectorySet, boolean remove) throws IOException {
         extension.log("    Processing directory : " + sourceDirectorySet.getName());
 
-        Set<File> dirs = new LinkedHashSet<>();
         Preprocessor preprocessor = new Preprocessor(extension.getVars(), remove);
-        //Preprocessor inPlacePreprocessor = new Preprocessor(extension.getVars(), false);
 
         for (File sourceDirectory : sourceDirectorySet.getSrcDirs()) {
             for (File sourceFile : project.fileTree(sourceDirectory)) {
                 extension.log("    Processing " + sourceFile.toString());
                 File processFile = getDestinationDir().toPath().resolve(sourceDirectory.toPath().relativize(sourceFile.toPath())).toFile();
                 preprocessor.process(sourceFile, processFile);
-
-                //if(extension.getInPlace() || extension.getResources().getInPlace()) {
-                //    inPlacePreprocessor.process(sourceFile, sourceFile);
-                //}
             }
         }
     }

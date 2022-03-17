@@ -3,3 +3,5 @@ debug: true
 ##else
 ### debug: false
 ##endif
+
+project: @PROJECT@

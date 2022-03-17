@@ -38,8 +38,8 @@ import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@SuppressWarnings({"WeakerAccess","unused"})
-public class PreprocessorExtension extends SourceType  {
+@SuppressWarnings({"WeakerAccess", "unused"})
+public class PreprocessorExtension extends SourceType {
 
     /**
      * Name of the extension to use in build.gradle
@@ -112,10 +112,9 @@ public class PreprocessorExtension extends SourceType  {
 
     public void setProcessDir(String processDir) {
         String buildName = this.project.getBuildDir().getName();
-        if(processDir.startsWith(buildName)) {
+        if (processDir.startsWith(buildName)) {
             setProcessDir(new File(this.project.getBuildDir().getParentFile(), processDir));
-        }
-        else {
+        } else {
             setProcessDir(new File(this.project.getBuildDir(), processDir));
         }
     }
@@ -158,7 +157,7 @@ public class PreprocessorExtension extends SourceType  {
 
     // Print out a string if verbose is enabled
     public void log(String msg) {
-        if(getVerbose()) {
+        if (getVerbose()) {
             System.out.println(msg);
         }
     }

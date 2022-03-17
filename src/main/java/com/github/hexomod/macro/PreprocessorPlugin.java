@@ -24,9 +24,7 @@
 
 package com.github.hexomod.macro;
 
-import org.gradle.api.Plugin;
-import org.gradle.api.Project;
-import org.gradle.api.ProjectConfigurationException;
+import org.gradle.api.*;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.CacheableTask;
@@ -37,7 +35,6 @@ import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.language.jvm.tasks.ProcessResources;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.stream.Collectors;
 
 
@@ -49,8 +46,8 @@ public class PreprocessorPlugin implements Plugin<Project> {
     public void apply(final Project project) {
 
         // Preprocessor require either java plugin or java-library plugin
-        if(!project.getPluginManager().hasPlugin("java") && !project.getPluginManager().hasPlugin("java-library")) {
-            throw new ProjectConfigurationException("The \"java\" or \"java-library\" plugin is required by MacroPreprocessor plugin.",new java.lang.Throwable("void apply(Project project)"));
+        if (!project.getPluginManager().hasPlugin("java") && !project.getPluginManager().hasPlugin("java-library")) {
+            throw new ProjectConfigurationException("The \"java\" or \"java-library\" plugin is required by MacroPreprocessor plugin.", new java.lang.Throwable("void apply(Project project)"));
         }
 
         // Make sure java plugin is applied
@@ -59,11 +56,19 @@ public class PreprocessorPlugin implements Plugin<Project> {
         // Configure extension
         PreprocessorExtension extension = configureExtension(project);
 
+        //
+        PreprocessorTask defaultTask = RegisterDefaultTask(project, extension);
+
+        //
+        PreprocessorInPlaceTask inPlaceTask = RegisterInPlaceTask(project, extension);
+
         // Register and configure preprocessors task
-        project.afterEvaluate( root -> {
-            RegisterPreprocessors(project, extension);
+        project.afterEvaluate(root -> {
+            configureInPlacePreprocessor(project, extension, inPlaceTask);
+            RegisterPreprocessors(project, extension, defaultTask, inPlaceTask);
         });
     }
+
 
     private PreprocessorExtension configureExtension(Project project) {
         return project.getExtensions().create(
@@ -72,23 +77,81 @@ public class PreprocessorPlugin implements Plugin<Project> {
                 , project);
     }
 
-    private void RegisterPreprocessors(Project project, PreprocessorExtension extension) {
+
+    private PreprocessorTask RegisterDefaultTask(Project project, PreprocessorExtension extension) {
+        PreprocessorTask defaultTask = project.getTasks().register(PreprocessorTask.TASK_ID, PreprocessorTask.class, preprocessor -> {
+            preprocessor.setDescription("Apply macro to source code.");
+            //preprocessor.setGroup("preprocessor");
+
+            preprocessor.doFirst(task -> {
+            });
+
+            preprocessor.doLast(task -> {
+            });
+        }).get();
+
+        // Make macroPreprocessor task depends on replacePreprocessor (if exist)
+        try {
+            Task replacePreprocessor = project.getTasks().getByName("replacePreprocessor");
+            defaultTask.dependsOn(replacePreprocessor);
+        } catch (UnknownTaskException ignored) {
+        }
+
+        return defaultTask;
+    }
+
+
+    private PreprocessorInPlaceTask RegisterInPlaceTask(Project project, PreprocessorExtension extension) {
+        PreprocessorInPlaceTask inPlaceTask = project.getTasks().register(PreprocessorInPlaceTask.TASK_ID, PreprocessorInPlaceTask.class, preprocessor -> {
+            preprocessor.setDescription("Apply macro to source code.");
+            preprocessor.setGroup("preprocessor");
+        }).get();
+
+        try {
+            // Make macroPreprocessor task depends on replacePreprocessor (if exist)
+            Task replacePreprocessor = project.getTasks().getByName("replacePreprocessor");
+            inPlaceTask.dependsOn(replacePreprocessor);
+        } catch (UnknownTaskException ignored) {
+        }
+
+        return inPlaceTask;
+    }
+
+    private void configureInPlacePreprocessor(Project project, PreprocessorExtension extension, PreprocessorInPlaceTask inPlaceTask) {
+        // Get all sourceSet to create one preprocessor per sourceSet
+        final SourceSetContainer sourceSets = project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets();
+
+        // Get compile task from SourceSet
+        for (SourceSet sourceSet : sourceSets) {
+            final JavaCompile compileTask = (JavaCompile) project.getTasks().findByName(sourceSet.getCompileJavaTaskName());
+            compileTask.dependsOn(inPlaceTask);
+            final ProcessResources resourceTask = (ProcessResources) project.getTasks().findByName(sourceSet.getProcessResourcesTaskName());
+            resourceTask.dependsOn(inPlaceTask);
+        }
+    }
+
+
+    private void RegisterPreprocessors(Project project, PreprocessorExtension extension, DefaultTask defaultTask, PreprocessorInPlaceTask inPlaceTask) {
         // Get all sourceSet to create one preprocessor per sourceSet
         final SourceSetContainer sourceSets = project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets();
 
         // Register each preprocessor
-        for(SourceSet sourceSet : sourceSets) {
+        for (SourceSet sourceSet : sourceSets) {
             // Java files
-            if(extension.getEnable() && extension.getJava().getEnable()) {
+            if (extension.getEnable() && extension.getJava().getEnable()) {
                 final JavaCompile compileTask = (JavaCompile) project.getTasks().findByName(sourceSet.getCompileJavaTaskName());
                 PreprocessorTask preprocessor = RegisterJavaPreprocessor(project, extension, sourceSet, compileTask).get();
+                preprocessor.dependsOn(inPlaceTask);
                 compileTask.dependsOn(preprocessor);
+                defaultTask.dependsOn(preprocessor);
             }
             // Resources files
-            if(extension.getEnable() && extension.getResources().getEnable()) {
+            if (extension.getEnable() && extension.getResources().getEnable()) {
                 final ProcessResources resourceTask = (ProcessResources) project.getTasks().findByName(sourceSet.getProcessResourcesTaskName());
                 PreprocessorTask preprocessor = RegisterResourcesPreprocessor(project, extension, sourceSet, resourceTask).get();
+                preprocessor.dependsOn(inPlaceTask);
                 resourceTask.dependsOn(preprocessor);
+                defaultTask.dependsOn(preprocessor);
             }
         }
     }
@@ -100,14 +163,12 @@ public class PreprocessorPlugin implements Plugin<Project> {
             preprocessor.setSourceSet(sourceSet);
             preprocessor.from(sourceSet.getJava().getSrcDirs());
             preprocessor.exclude(sourceSet.getResources().getSrcDirs().stream().map(File::getPath).collect(Collectors.toList()));
-            preprocessor.setDestinationDir(new File(new File(extension.getProcessDir(), sourceSet.getName()),"java"));
+            preprocessor.setDestinationDir(new File(new File(extension.getProcessDir(), sourceSet.getName()), "java"));
 
-            sourceSet.getJava().setSrcDirs(Collections.singletonList(preprocessor.getDestinationDir()));
-
-            preprocessor.doFirst( task -> {
+            preprocessor.doFirst(task -> {
             });
 
-            preprocessor.doLast( task -> {
+            preprocessor.doLast(task -> {
             });
         });
     }
@@ -118,14 +179,12 @@ public class PreprocessorPlugin implements Plugin<Project> {
             preprocessor.setGroup("preprocessor");
             preprocessor.setSourceSet(sourceSet);
             preprocessor.from(sourceSet.getResources().getSrcDirs());
-            preprocessor.setDestinationDir(new File(new File(extension.getProcessDir(), sourceSet.getName()),"resources"));
+            preprocessor.setDestinationDir(new File(new File(extension.getProcessDir(), sourceSet.getName()), "resources"));
 
-            sourceSet.getResources().setSrcDirs(Collections.singletonList(preprocessor.getDestinationDir()));
-
-            preprocessor.doFirst( task -> {
+            preprocessor.doFirst(task -> {
             });
 
-            preprocessor.doLast( task -> {
+            preprocessor.doLast(task -> {
             });
         });
     }

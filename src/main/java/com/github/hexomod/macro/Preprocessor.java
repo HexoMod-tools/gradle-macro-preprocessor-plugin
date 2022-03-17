@@ -35,32 +35,32 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@SuppressWarnings({"WeakerAccess","unused"})
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class Preprocessor {
 
     static final Map<String, String> SLASH_KEYWORDS = new HashMap<String, String>() {{
-        put("ifdef",   "//#ifdef");
-        put("if",      "//#if");
-        put("else",    "//#else");
-        put("elseif",  "//#elseif");
-        put("endif",   "//#endif");
+        put("ifdef", "//#ifdef");
+        put("if", "//#if");
+        put("else", "//#else");
+        put("elseif", "//#elseif");
+        put("endif", "//#endif");
         put("comment", "///");
     }};
 
     static final Map<String, String> HASH_KEYWORDS = new HashMap<String, String>() {{
-        put("ifdef",   "##ifdef");
-        put("if",      "##if");
-        put("else",    "##else");
-        put("elseif",  "##elseif");
-        put("endif",   "##endif");
+        put("ifdef", "##ifdef");
+        put("if", "##if");
+        put("else", "##else");
+        put("elseif", "##elseif");
+        put("endif", "##endif");
         put("comment", "###");
     }};
 
     static Map<String, Map<String, String>> EXTENSION_KEYWORDS = new HashMap<String, Map<String, String>>() {{
-        put("java",   SLASH_KEYWORDS);
+        put("java", SLASH_KEYWORDS);
         put("gradle", SLASH_KEYWORDS);
-        put("yaml",   HASH_KEYWORDS);
-        put("yml",    HASH_KEYWORDS);
+        put("yaml", HASH_KEYWORDS);
+        put("yml", HASH_KEYWORDS);
     }};
 
     private final Map<String, Object> vars;
@@ -80,23 +80,23 @@ public class Preprocessor {
         // check if the file extension is a known extension
         String fileExtension = FilenameUtils.getExtension(inFile.getName());
         boolean known = EXTENSION_KEYWORDS.containsKey(fileExtension);
-        if(known) {
+        if (known) {
             keywords = EXTENSION_KEYWORDS.get(fileExtension);
         }
         // if the extension is not know, then try to find one of the keywords in the file
         String fileString = FileUtils.readFileToString(inFile, StandardCharsets.UTF_8);
-        if(!known) {
-            for(String slash : SLASH_KEYWORDS.values()) {
-                if(slash != "///" && fileString.contains(slash)) {
+        if (!known) {
+            for (String slash : SLASH_KEYWORDS.values()) {
+                if (slash != "///" && fileString.contains(slash)) {
                     known = true;
                     keywords = SLASH_KEYWORDS;
                     break;
                 }
             }
         }
-        if(!known) {
-            for(String slash : HASH_KEYWORDS.values()) {
-                if(slash != "###" && fileString.contains(slash)) {
+        if (!known) {
+            for (String slash : HASH_KEYWORDS.values()) {
+                if (slash != "###" && fileString.contains(slash)) {
                     known = true;
                     keywords = HASH_KEYWORDS;
                     break;
@@ -105,7 +105,7 @@ public class Preprocessor {
         }
         // First check if the file need to be processed
         // If not, the file is just copied to its destination
-        if(!known) {
+        if (!known) {
             if (!inFile.equals(outFile)) {
                 FileUtils.copyFile(inFile, outFile);
             }
@@ -121,11 +121,13 @@ public class Preprocessor {
                 // Create parent folder if needed
                 FileUtils.forceMkdirParent(outFile);
                 // Write output file
-                FileUtils.writeLines(outFile, StandardCharsets.UTF_8.toString(), lines, "\n", false );
-            }
-            catch (Exception e) {
-                if(e instanceof ParserException) { throw e; }
-                else {  throw new RuntimeException("Failed to convert file " + inFile, e); }
+                FileUtils.writeLines(outFile, StandardCharsets.UTF_8.toString(), lines, "\n", false);
+            } catch (Exception e) {
+                if (e instanceof ParserException) {
+                    throw e;
+                } else {
+                    throw new RuntimeException("Failed to convert file " + inFile, e);
+                }
             }
         }
     }
@@ -139,11 +141,11 @@ public class Preprocessor {
         skips.push(false);
 
         // Loop through all lines
-        for(String line : lines) {
+        for (String line : lines) {
             String trimLine = line.trim();
 
             // ifdef
-            if(trimLine.startsWith(keywords.get("ifdef"))) {
+            if (trimLine.startsWith(keywords.get("ifdef"))) {
                 // Check condition
                 boolean active = this.vars.get(trimLine.substring(keywords.get("ifdef").length()).trim()) != null;
                 // Store the last active state
@@ -151,10 +153,10 @@ public class Preprocessor {
                 //
                 skips.push(active);
                 // Keep macro line
-                if(!remove) newLines.add(line);
+                if (!remove) newLines.add(line);
             }
             // if
-            else if(trimLine.startsWith(keywords.get("if"))) {
+            else if (trimLine.startsWith(keywords.get("if"))) {
                 // Evaluate if condition
                 boolean active = evaluateExpression(trimLine.substring(keywords.get("if").length()));
                 // Store the last active state
@@ -162,14 +164,14 @@ public class Preprocessor {
                 //
                 skips.push(active);
                 // Keep macro line
-                if(!remove) newLines.add(line);
+                if (!remove) newLines.add(line);
             }
             // elseif
-            else if(trimLine.startsWith(keywords.get("elseif"))) {
+            else if (trimLine.startsWith(keywords.get("elseif"))) {
                 // get last skip
                 boolean skip = skips.getFirst();
                 //
-                if(!skip) {
+                if (!skip) {
                     // get last active state
                     boolean active = state.getFirst();
                     // Evaluate elseif condition
@@ -181,20 +183,19 @@ public class Preprocessor {
                     //
                     skips.pop();
                     skips.push(skip & skips.getFirst());
-                }
-                else {
+                } else {
                     state.pop();
                     state.push(false);
                 }
                 // Keep macro line
-                if(!remove) newLines.add(line);
+                if (!remove) newLines.add(line);
             }
             // else
-            else if(trimLine.startsWith(keywords.get("else"))) {
+            else if (trimLine.startsWith(keywords.get("else"))) {
                 // get last skip
                 boolean skip = skips.getFirst();
                 //
-                if(!skip) {
+                if (!skip) {
                     // get last active state
                     boolean active = state.getFirst();
                     // Revert the last state
@@ -203,31 +204,29 @@ public class Preprocessor {
                     //
                     skips.pop();
                     skips.push((!skip) & skips.getFirst());
-                }
-                else {
+                } else {
                     state.pop();
                     state.push(false);
                 }
                 // Keep macro line
-                if(!remove) newLines.add(line);
+                if (!remove) newLines.add(line);
             }
             // endif
-            else if(trimLine.startsWith(keywords.get("endif"))) {
+            else if (trimLine.startsWith(keywords.get("endif"))) {
                 // Enable
                 state.pop();
                 //
                 skips.pop();
                 // Keep macro line
-                if(!remove) newLines.add(line);
-            }
-            else {
+                if (!remove) newLines.add(line);
+            } else {
                 // get last active state
                 boolean active = state.getFirst();
                 //
-                if(active)
+                if (active)
                     newLines.add(uncommentLine(line, keywords));
                 else {
-                    if(!remove) newLines.add(commentLine(line, keywords));
+                    if (!remove) newLines.add(commentLine(line, keywords));
                 }
             }
         }
@@ -235,32 +234,30 @@ public class Preprocessor {
     }
 
     String commentLine(String line, Map<String, String> keywords) {
-        if(line.isEmpty()) {
+        if (line.isEmpty()) {
             return line;
         }
         int indent = getIndentSize(line);
         String trimLine = line.trim();
-        if(trimLine.startsWith(keywords.get("comment"))) {
+        if (trimLine.startsWith(keywords.get("comment"))) {
             return line;
-        }
-        else {
-            return StringUtils.repeat(" ", indent) +  keywords.get("comment") + " " + trimLine;
+        } else {
+            return StringUtils.repeat(" ", indent) + keywords.get("comment") + " " + trimLine;
         }
     }
 
     String uncommentLine(String line, Map<String, String> keywords) {
         int indent = getIndentSize(line);
         String trimLine = line.trim();
-        if(trimLine.startsWith(keywords.get("comment"))) {
+        if (trimLine.startsWith(keywords.get("comment"))) {
             return StringUtils.repeat(" ", indent) + trimLine.substring(keywords.get("comment").length()).trim();
-        }
-        else {
+        } else {
             return line;
         }
     }
 
     int getIndentSize(String str) {
-        if(str.isEmpty()) {
+        if (str.isEmpty()) {
             return 0;
         }
         int count = 0;
@@ -274,14 +271,14 @@ public class Preprocessor {
         // Test if var can be converted to number
         if (NumberUtils.isCreatable(var)) {
             Object number = NumberUtils.createNumber(var);
-            if(number instanceof Float){
+            if (number instanceof Float) {
                 return Double.parseDouble(number.toString());
             } else {
                 return number;
             }
         }
         // Test if var can be converted to boolean
-        else if((var != null) && (var.equalsIgnoreCase("true") || var.equalsIgnoreCase("false"))) {
+        else if ((var != null) && (var.equalsIgnoreCase("true") || var.equalsIgnoreCase("false"))) {
             return Boolean.parseBoolean(var);
         }
         //
@@ -309,44 +306,57 @@ public class Preprocessor {
             Object left = evaluateVariable(matcher.group(1).trim());
             Object right = evaluateVariable(matcher.group(3).trim());
             // Compare booleans
-            if(left instanceof Boolean && right instanceof Boolean) {
+            if (left instanceof Boolean && right instanceof Boolean) {
                 boolean nLeft = (Boolean) left;
                 boolean nRight = (Boolean) right;
                 switch (matcher.group(2)) {
-                    case "==": return nLeft == nRight;
-                    case "!=": return !(nLeft == nRight);
+                    case "==":
+                        return nLeft == nRight;
+                    case "!=":
+                        return !(nLeft == nRight);
                 }
                 return false;
             }
             // Compare numbers
-            else if(left instanceof Number && right instanceof Number) {
+            else if (left instanceof Number && right instanceof Number) {
                 double nLeft = Double.parseDouble(left.toString());
                 double nRight = Double.parseDouble(right.toString());
                 switch (matcher.group(2)) {
-                    case "<=": return nLeft <= nRight;
-                    case ">=": return nLeft >= nRight;
-                    case "==": return nLeft == nRight;
-                    case "!=": return !(nLeft == nRight);
-                    case "<": return nLeft < nRight;
-                    case ">": return nLeft > nRight;
+                    case "<=":
+                        return nLeft <= nRight;
+                    case ">=":
+                        return nLeft >= nRight;
+                    case "==":
+                        return nLeft == nRight;
+                    case "!=":
+                        return !(nLeft == nRight);
+                    case "<":
+                        return nLeft < nRight;
+                    case ">":
+                        return nLeft > nRight;
                 }
                 return false;
             }
             // Compare strings
-            else if(left instanceof String && right instanceof String) {
+            else if (left instanceof String && right instanceof String) {
                 String sLeft = (String) left;
                 String sRight = (String) right;
                 switch (matcher.group(2)) {
-                    case "<=": return StringUtils.compare(sLeft, sRight) <= 0;
-                    case ">=": return StringUtils.compare(sLeft, sRight) >= 0;
-                    case "==": return StringUtils.equalsIgnoreCase(sLeft, sRight);
-                    case "!=": return !(StringUtils.equalsIgnoreCase(sLeft, sRight));
-                    case "<": return StringUtils.compare(sLeft, sRight) < 0;
-                    case ">": return StringUtils.compare(sLeft, sRight) > 0;
+                    case "<=":
+                        return StringUtils.compare(sLeft, sRight) <= 0;
+                    case ">=":
+                        return StringUtils.compare(sLeft, sRight) >= 0;
+                    case "==":
+                        return StringUtils.equalsIgnoreCase(sLeft, sRight);
+                    case "!=":
+                        return !(StringUtils.equalsIgnoreCase(sLeft, sRight));
+                    case "<":
+                        return StringUtils.compare(sLeft, sRight) < 0;
+                    case ">":
+                        return StringUtils.compare(sLeft, sRight) > 0;
                 }
                 return false;
-            }
-            else {
+            } else {
                 return false;
             }
         }
