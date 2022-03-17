@@ -68,7 +68,7 @@ macroPreprocessorSettings {
         remove = true       // default: true
     }
 
-    vars = [VAR_STRING: "value_string", VAR_BOOL: true, VAR_INT: 1, VAR_DOUBLE: 1.5, PROJECT: "Project2", DEBUG: true]
+    vars = [VAR_STRING: "value_string", VAR_BOOL: true, VAR_INT: 1, VAR_DOUBLE: 1.5, DEBUG: true]
 }
 
 replaceTokenPreprocessorSettings {
