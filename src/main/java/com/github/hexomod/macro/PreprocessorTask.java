@@ -25,10 +25,13 @@ package com.github.hexomod.macro;
 
 
 import org.gradle.api.Project;
+import org.gradle.api.Task;
 import org.gradle.api.file.SourceDirectorySet;
-import org.gradle.api.tasks.*;
-import org.gradle.language.base.internal.tasks.SimpleStaleClassCleaner;
-import org.gradle.language.base.internal.tasks.StaleClassCleaner;
+import org.gradle.api.specs.Spec;
+import org.gradle.api.tasks.CacheableTask;
+import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.TaskAction;
+import org.gradle.language.jvm.tasks.ProcessResources;
 import org.gradle.util.GUtil;
 
 import javax.inject.Inject;
@@ -39,7 +42,7 @@ import java.util.Collections;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 @CacheableTask
-public class PreprocessorTask extends Copy {
+public class PreprocessorTask extends ProcessResources {
 
     public static final String TASK_ID = "macroPreprocessor";
     public static final String TASK_RESOURCE_SUFFIX = "Resource";
@@ -55,26 +58,29 @@ public class PreprocessorTask extends Copy {
 
     private final Project project;
     private final PreprocessorExtension extension;
-
-    @Nested
     private SourceSet sourceSet;
 
     @Inject
     public PreprocessorTask() {
         this.project = getProject();
         this.extension = project.getExtensions().findByType(PreprocessorExtension.class);
+
+        this.getOutputs().upToDateWhen(new Spec<Task>() {
+            @Override
+            public boolean isSatisfiedBy(Task element) {
+                boolean java =sourceSet.getJava().getSrcDirs().contains(getDestinationDir());
+                boolean resources =sourceSet.getResources().getSrcDirs().contains(getDestinationDir());
+                return java && resources;
+            }
+        });
     }
 
-    public void setSourceSet(SourceSet sourceSets) {
-        this.sourceSet = sourceSets;
+    public void setSourceSet(SourceSet sourceSet) {
+        this.sourceSet = sourceSet;
     }
 
     protected void copy() {
         if (sourceSet != null) {
-            extension.log("Copying files ...");
-            StaleClassCleaner cleaner = new SimpleStaleClassCleaner(this.getOutputs());
-            cleaner.addDirToClean(this.getDestinationDir());
-            cleaner.execute();
             super.copy();
         }
     }
