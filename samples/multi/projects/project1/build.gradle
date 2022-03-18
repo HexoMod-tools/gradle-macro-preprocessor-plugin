@@ -5,8 +5,8 @@ buildscript {
         maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
-        classpath group: 'com.github.hexomod', name: 'MacroPreprocessor', version: '0.9-SNAPSHOT'
-        classpath group: 'com.github.hexomod', name: 'ReplaceTokenPreprocessor', version: '0.4-SNAPSHOT'
+        classpath group: 'com.github.hexomod', name: 'MacroPreprocessor', version: '0.9'
+        classpath group: 'com.github.hexomod', name: 'ReplaceTokenPreprocessor', version: '0.4'
     }
 }
 

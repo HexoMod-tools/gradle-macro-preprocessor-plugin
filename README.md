@@ -18,7 +18,7 @@ The preprocessor is published in [Gradle central](https://plugins.gradle.org/plu
 Using the plugins DSL:
 ```gradle
 plugins {
-  id "com.github.hexomod.macro.preprocessor" version "0.8"
+  id "com.github.hexomod.macro.preprocessor" version "0.9"
 }
 ```
 
@@ -31,7 +31,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "com.github.hexomod:MacroPreprocessor:0.8"
+    classpath "com.github.hexomod:MacroPreprocessor:0.9"
   }
 }
 
