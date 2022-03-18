@@ -1,5 +1,7 @@
 ##ifdef DEBUG
 debug: true
 ##else
-debug: false
+### debug: false
 ##endif
+
+project: @PROJECT@

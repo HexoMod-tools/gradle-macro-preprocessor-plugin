@@ -24,94 +24,100 @@
 package com.github.hexomod.macro;
 
 
-import org.apache.commons.io.FileUtils;
-import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
+import org.gradle.api.Task;
 import org.gradle.api.file.SourceDirectorySet;
+import org.gradle.api.specs.Spec;
+import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.language.jvm.tasks.ProcessResources;
+import org.gradle.util.GUtil;
 
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 
-@SuppressWarnings({"WeakerAccess","unused"})
-public class PreprocessorTask extends DefaultTask {
+@SuppressWarnings({"WeakerAccess", "unused"})
+@CacheableTask
+public class PreprocessorTask extends ProcessResources {
 
     public static final String TASK_ID = "macroPreprocessor";
+    public static final String TASK_RESOURCE_SUFFIX = "Resource";
+    public static final String TASK_JAVA_SUFFIX = "Java";
+
+    public static String getResourceTaskName(SourceSet sourceSet) {
+        return TASK_ID + (sourceSet.getName() == "main" ? "" : GUtil.toCamelCase(sourceSet.getName())) + TASK_RESOURCE_SUFFIX;
+    }
+
+    public static String getJavaTaskName(SourceSet sourceSet) {
+        return TASK_ID + (sourceSet.getName() == "main" ? "" : GUtil.toCamelCase(sourceSet.getName())) + TASK_JAVA_SUFFIX;
+    }
 
     private final Project project;
     private final PreprocessorExtension extension;
-    private Preprocessor preprocessor;
-
+    private SourceSet sourceSet;
 
     @Inject
     public PreprocessorTask() {
         this.project = getProject();
         this.extension = project.getExtensions().findByType(PreprocessorExtension.class);
+
+        this.getOutputs().upToDateWhen(new Spec<Task>() {
+            @Override
+            public boolean isSatisfiedBy(Task element) {
+                boolean java =sourceSet.getJava().getSrcDirs().contains(getDestinationDir());
+                boolean resources =sourceSet.getResources().getSrcDirs().contains(getDestinationDir());
+                return java && resources;
+            }
+        });
+    }
+
+    public void setSourceSet(SourceSet sourceSet) {
+        this.sourceSet = sourceSet;
+    }
+
+    protected void copy() {
+        if (sourceSet != null) {
+            super.copy();
+        }
     }
 
     @TaskAction
     public void process() throws IOException {
-        log("Starting macro preprocessor");
-
-        // Instantiate macro preprocessor
-        this.preprocessor = new Preprocessor(extension.getVars(), extension.getRemove());
-
-        // Loop through all SourceSets
-        for(SourceSet sourceSet : extension.getSourceSets()) {
-            processSourceSet(sourceSet);
+        if (sourceSet != null) {
+            extension.log("Processing files ...");
+            processSourceSet();
         }
     }
 
-    private void processSourceSet(final SourceSet sourceSet) throws IOException {
-        log("  Processing sourceSet : " + sourceSet.getName());
+    private void processSourceSet() throws IOException {
+        extension.log("  Processing sourceSet : " + sourceSet.getName());
 
-        // Resources files
-        SourceDirectorySet resourceDirectorySet = sourceSet.getResources();
-        Set<File> resDirs = processSourceDirectorySet(resourceDirectorySet, sourceSet.getName());
+        if (getName().equals(getJavaTaskName(sourceSet))) {
+            processSourceDirectorySet(sourceSet.getJava(), extension.getRemove() || extension.getJava().getRemove());
+            sourceSet.getJava().setSrcDirs(Collections.singletonList(getDestinationDir()));
+        }
 
-        // Java files
-        SourceDirectorySet javaDirectorySet = sourceSet.getJava();
-        Set<File> srcDirs = processSourceDirectorySet(javaDirectorySet, sourceSet.getName());
-
-        //
-        sourceSet.getResources().setSrcDirs(Collections.singleton(resDirs));
-        sourceSet.getJava().setSrcDirs(Collections.singleton(srcDirs));
+        if (getName().equals(getResourceTaskName(sourceSet))) {
+            processSourceDirectorySet(sourceSet.getResources(), extension.getRemove() || extension.getResources().getRemove());
+            sourceSet.getResources().setSrcDirs(Collections.singletonList(getDestinationDir()));
+        }
     }
 
-    private Set<File> processSourceDirectorySet(final SourceDirectorySet sourceDirectorySet, String sourceSetName) throws IOException {
-        log("    Processing directory : " + sourceDirectorySet.getName());
+    private void processSourceDirectorySet(final SourceDirectorySet sourceDirectorySet, boolean remove) throws IOException {
+        extension.log("    Processing directory : " + sourceDirectorySet.getName());
 
-        Set<File> dirs = new LinkedHashSet<>();
+        Preprocessor preprocessor = new Preprocessor(extension.getVars(), remove);
 
         for (File sourceDirectory : sourceDirectorySet.getSrcDirs()) {
-            String resourceDirName = sourceDirectory.getName();
-
-            File processDir = new File(extension.getProcessDir(), sourceSetName);
-            processDir = new File(processDir, resourceDirName);
-            FileUtils.forceMkdir(processDir);
-
-            dirs.add(processDir);
-
             for (File sourceFile : project.fileTree(sourceDirectory)) {
-                log("    Processing " + sourceFile.toString());
-                File processFile = processDir.toPath().resolve(sourceDirectory.toPath().relativize(sourceFile.toPath())).toFile();
+                extension.log("    Processing " + sourceFile.toString());
+                File processFile = getDestinationDir().toPath().resolve(sourceDirectory.toPath().relativize(sourceFile.toPath())).toFile();
                 preprocessor.process(sourceFile, processFile);
             }
-        }
-
-        return dirs;
-    }
-
-    // Print out a string if verbose is enabled
-    private void log(String msg) {
-        if(this.extension != null && this.extension.getVerbose()) {
-            System.out.println(msg);
         }
     }
 }

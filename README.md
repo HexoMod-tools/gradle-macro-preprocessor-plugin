@@ -5,11 +5,11 @@ A simple macro preprocessor for java
 
 ## Supported macros
 
-`#ifdef`  
-`#if`  
-`#elseif`  
-`#else`  
-`#endif`  
+`//#ifdef`      or      `##ifdef`  
+`//#if`         or      `##if`  
+`//#elseif`     or      `##elseif`  
+`//#else`       or      `##else`  
+`//#endif`      or      `##endif`  
 
 # How to use
 
@@ -18,7 +18,7 @@ The preprocessor is published in [Gradle central](https://plugins.gradle.org/plu
 Using the plugins DSL:
 ```gradle
 plugins {
-  id "com.github.hexomod.macro.preprocessor" version "0.8"
+  id "com.github.hexomod.macro.preprocessor" version "0.9"
 }
 ```
 
@@ -31,7 +31,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "com.github.hexomod:MacroPreprocessor:0.8"
+    classpath "com.github.hexomod:MacroPreprocessor:0.9"
   }
 }
 
@@ -42,7 +42,22 @@ apply plugin: "com.github.hexomod.macro.preprocessor"
 
 ```gradle
 macroPreprocessorSettings {
-    verbose true
+    verbose = true      // default: false
+    inPlace = false     // default: false
+    remove = false      // default: false
+
+    java {
+        enable = true       // default: true
+        inPlace = true      // default: false
+        remove = false      // default: false
+    }
+
+    resources {
+        enable = true       // default: true
+        inPlace = true      // default: true
+        remove = true       // default: true
+    }
+    
     vars = [VAR_STRING: "value_string", VAR_BOOL: true, VAR_INT: 1, VAR_DOUBLE: 2.0, PROJECT: "Basic", DEBUG: true]
 }
 ```

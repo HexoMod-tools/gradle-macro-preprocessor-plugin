@@ -5,7 +5,8 @@ buildscript {
         maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
-        classpath group: 'com.github.hexomod', name: 'MacroPreprocessor', version: '0.8'
+        classpath group: 'com.github.hexomod', name: 'MacroPreprocessor', version: '0.9'
+        classpath group: 'com.github.hexomod', name: 'ReplaceTokenPreprocessor', version: '0.4'
     }
 }
 
@@ -15,6 +16,7 @@ plugins {
 }
 
 apply plugin: "com.github.hexomod.macro.preprocessor"
+apply plugin: "com.github.hexomod.replace.token.preprocessor"
 
 repositories {
     mavenLocal()
@@ -22,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
 }
 
 application {
@@ -43,7 +45,7 @@ sourceSets {
 
 // compile depends on the api sourceSet
 dependencies {
-    compile sourceSets.api.output
+    implementation sourceSets.api.output
 }
 
 // include output of api sourceSet
@@ -51,12 +53,27 @@ jar{
     from sourceSets.api.output
 }
 
-// Ensure macroPreprocessor is called before the api compiles
-tasks.withType(JavaCompile).configureEach {
-    dependsOn macroPreprocessor
+macroPreprocessorSettings {
+    verbose = false      // default: false
+    inPlace = false     // default: false
+    remove = false      // default: false
+
+    java {
+        enable = true       // default: true
+        inPlace = true      // default: false
+        remove = false      // default: false
+    }
+
+    resources {
+        enable = true       // default: true
+        inPlace = true      // default: true
+        remove = true       // default: true
+    }
+
+    vars = [VAR_STRING: "value_string", VAR_BOOL: true, VAR_INT: 1, VAR_DOUBLE: 2.0, PROJECT: "Basic", DEBUG: true, GRADLE: true]
 }
 
-macroPreprocessorSettings {
-    verbose true
-    vars = [VAR_STRING: "value_string", VAR_BOOL: true, VAR_INT: 1, VAR_DOUBLE: 2.0, PROJECT: "Basic", DEBUG: true]
+replaceTokenPreprocessorSettings {
+    replace '@HELLO@': 'world'
+    replace '@GRADLE@': 'gradle'
 }

@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'com.github.hexomod'
-version = '0.8'
+version = '0.9'
 
 // Minimum java version
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -26,15 +26,16 @@ tasks.withType(JavaCompile) {
 // Repositories for dependencies resolution
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 // Dependencies of this plugin
 dependencies {
-    compile gradleApi()
-    compile group: 'commons-io', name: 'commons-io', version: '2.6'
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
+    implementation gradleApi()
+    implementation group: 'commons-io', name: 'commons-io', version: '2.6'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
 
-    testCompile  group: 'junit', name: 'junit', version: '4.12'
+    testImplementation  group: 'junit', name: 'junit', version: '4.12'
 }
 
 // License checker
