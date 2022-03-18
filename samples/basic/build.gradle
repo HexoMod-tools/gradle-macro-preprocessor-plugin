@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
 }
 
 application {
@@ -45,7 +45,7 @@ sourceSets {
 
 // compile depends on the api sourceSet
 dependencies {
-    compile sourceSets.api.output
+    implementation sourceSets.api.output
 }
 
 // include output of api sourceSet
