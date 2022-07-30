@@ -278,8 +278,35 @@ public class PreprocessorTest {
         assertFalse(lines.get(5).compareTo(preprocessor.commentLine(testLine, SLASH_KEYWORDS))==0);
     }
 
-    @Test
-    public void processLines_complex_elseif_t_f_f() {
+	@Test
+	public void processLines_simple_elseif_f_t_f_f() {
+		String testLine0 = "String message = '0';";
+		String testLine1 = "String message = '1';";
+		String testLine2 = "String message = '2';";
+		String testLine = "String message = '';";
+
+		List<String> lines = new ArrayList<>();
+		lines.add("//#if VAR_INT>100");            // false
+		lines.add(testLine0);
+		lines.add("//#elseif VAR_INT<10");         // true
+		lines.add(testLine1);
+		lines.add("//#elseif VAR_BOOL");           // false (but condition true)
+		lines.add(testLine2);
+		lines.add("//#else");
+		lines.add(testLine);
+		lines.add("//#endif");
+
+		Preprocessor preprocessor = new Preprocessor(vars);
+		lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
+
+		assertEquals(preprocessor.commentLine(testLine0, SLASH_KEYWORDS), lines.get(1));
+		assertEquals(testLine1, lines.get(3));
+		assertEquals(preprocessor.commentLine(testLine2, SLASH_KEYWORDS), lines.get(5));
+		assertEquals(preprocessor.commentLine(testLine, SLASH_KEYWORDS), lines.get(7));
+	}
+
+	@Test
+	public void processLines_complex_elseif_t_f_f() {
 
         String testLine0 = "String message = '0';";
         String testLine1 = "String message = '1';";
