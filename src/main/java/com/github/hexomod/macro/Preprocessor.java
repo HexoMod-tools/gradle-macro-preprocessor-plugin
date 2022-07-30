@@ -242,7 +242,7 @@ public class Preprocessor {
         if (trimLine.startsWith(keywords.get("comment"))) {
             return line;
         } else {
-            return StringUtils.repeat(" ", indent) + keywords.get("comment") + " " + trimLine;
+            return line.substring(0, indent) + keywords.get("comment") + " " + trimLine;
         }
     }
 
@@ -250,7 +250,7 @@ public class Preprocessor {
         int indent = getIndentSize(line);
         String trimLine = line.trim();
         if (trimLine.startsWith(keywords.get("comment"))) {
-            return StringUtils.repeat(" ", indent) + trimLine.substring(keywords.get("comment").length()).trim();
+            return line.substring(0, indent) + trimLine.substring(keywords.get("comment").length()).trim();
         } else {
             return line;
         }
