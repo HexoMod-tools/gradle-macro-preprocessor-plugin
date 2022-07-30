@@ -1,0 +1,14 @@
+String message = "0";|/// String message = "0";|SLASH
+String message = "1";|### String message = "1";|HASH
+	String message = "2";|	/// String message = "2";|SLASH
+	String message = "3";|	### String message = "3";|HASH
+  String message = "4";|  /// String message = "4";|SLASH
+  String message = "5";|  ### String message = "5";|HASH
+    String message = "6";|    /// String message = "6";|SLASH
+    String message = "7";|    ### String message = "7";|HASH
+	  String message = "8";|	  /// String message = "8";|SLASH
+	  String message = "9";|	  ### String message = "9";|HASH
+// comment|/// // comment|SLASH
+# comment|### # comment|HASH
+	// comment|	/// // comment|SLASH
+	# comment|	### # comment|HASH

@@ -23,13 +23,18 @@
  */
 package com.github.hexomod.macro;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import static com.github.hexomod.macro.Preprocessor.HASH_KEYWORDS;
 import static com.github.hexomod.macro.Preprocessor.SLASH_KEYWORDS;
 import static org.junit.Assert.*;
 
@@ -440,4 +445,50 @@ public class PreprocessorTest {
         assertTrue(lines.get(4).compareTo(preprocessor.commentLine(testLine1, SLASH_KEYWORDS))==0);
         assertTrue(lines.get(6).compareTo(preprocessor.commentLine(testLine, SLASH_KEYWORDS))==0);
     }
+
+	@RunWith(Parameterized.class)
+	public static class CommentTests {
+		static Preprocessor preprocessor;
+		@BeforeClass
+		public static void setup() {
+			preprocessor = new Preprocessor(Collections.emptyMap());
+		}
+
+		@Parameterized.Parameter(0) public String plain;
+		@Parameterized.Parameter(1) public String commented;
+		@Parameterized.Parameter(2) public Map<String, String> keywords;
+		@Parameterized.Parameters
+		public static Collection<Object[]> data() {
+			try {
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(PreprocessorTest.class.getResource("preprocessor_comment_data.csv").openStream())
+				);
+				List<Object[]> data = reader.lines().map(line -> {
+					String[] parts = line.split("\\|");
+					if ("SLASH".equals(parts[2])) {
+						return new Object[]{parts[0], parts[1], SLASH_KEYWORDS};
+					} else if ("HASH".equals(parts[2])) {
+						return new Object[]{parts[0], parts[1], HASH_KEYWORDS};
+					} else {
+						throw new RuntimeException();
+					}
+				}).collect(Collectors.toList());
+
+				reader.close();
+				return data;
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		@Test
+		public void commentLine() {
+			assertEquals("Trying to comment \"" + plain + "\"", commented, preprocessor.commentLine(plain, keywords));
+		}
+
+		@Test
+		public void uncommentLine() {
+			assertEquals("Trying to uncomment \"" + commented + "\"", plain, preprocessor.uncommentLine(commented, keywords));
+		}
+	}
 }
