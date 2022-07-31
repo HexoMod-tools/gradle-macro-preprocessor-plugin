@@ -59,8 +59,11 @@ public class Preprocessor {
     static Map<String, Map<String, String>> EXTENSION_KEYWORDS = new HashMap<String, Map<String, String>>() {{
         put("java", SLASH_KEYWORDS);
         put("gradle", SLASH_KEYWORDS);
+		put("hjson", SLASH_KEYWORDS);
+		put("json5", SLASH_KEYWORDS);
         put("yaml", HASH_KEYWORDS);
         put("yml", HASH_KEYWORDS);
+		put("toml", HASH_KEYWORDS);
     }};
 
     private final Map<String, Object> vars;
