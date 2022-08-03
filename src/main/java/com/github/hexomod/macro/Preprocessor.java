@@ -59,8 +59,11 @@ public class Preprocessor {
     static Map<String, Map<String, String>> EXTENSION_KEYWORDS = new HashMap<String, Map<String, String>>() {{
         put("java", SLASH_KEYWORDS);
         put("gradle", SLASH_KEYWORDS);
+		put("hjson", SLASH_KEYWORDS);
+		put("json5", SLASH_KEYWORDS);
         put("yaml", HASH_KEYWORDS);
         put("yml", HASH_KEYWORDS);
+		put("toml", HASH_KEYWORDS);
     }};
 
     private final Map<String, Object> vars;
@@ -87,7 +90,7 @@ public class Preprocessor {
         String fileString = FileUtils.readFileToString(inFile, StandardCharsets.UTF_8);
         if (!known) {
             for (String slash : SLASH_KEYWORDS.values()) {
-                if (slash != "///" && fileString.contains(slash)) {
+                if (!"///".equals(slash) && fileString.contains(slash)) {
                     known = true;
                     keywords = SLASH_KEYWORDS;
                     break;
@@ -96,7 +99,7 @@ public class Preprocessor {
         }
         if (!known) {
             for (String slash : HASH_KEYWORDS.values()) {
-                if (slash != "###" && fileString.contains(slash)) {
+                if (!"###".equals(slash) && fileString.contains(slash)) {
                     known = true;
                     keywords = HASH_KEYWORDS;
                     break;
@@ -134,9 +137,10 @@ public class Preprocessor {
 
     List<String> processLines(List<String> lines, Map<String, String> keywords) throws ParserException {
         LinkedList<Boolean> state = new LinkedList<>();
+        // Used for tracking elseif trees
         LinkedList<Boolean> skips = new LinkedList<>();
         List<String> newLines = new ArrayList<>();
-        // By default the line is considered as active
+        // By default, the line is considered as active
         state.push(true);
         skips.push(false);
 
@@ -150,7 +154,7 @@ public class Preprocessor {
                 boolean active = this.vars.get(trimLine.substring(keywords.get("ifdef").length()).trim()) != null;
                 // Store the last active state
                 state.push(active & state.getFirst());
-                //
+                // Skip all further else statements
                 skips.push(active);
                 // Keep macro line
                 if (!remove) newLines.add(line);
@@ -161,71 +165,59 @@ public class Preprocessor {
                 boolean active = evaluateExpression(trimLine.substring(keywords.get("if").length()));
                 // Store the last active state
                 state.push(active & state.getFirst());
-                //
+                // Skip all further else statements
                 skips.push(active);
                 // Keep macro line
                 if (!remove) newLines.add(line);
             }
             // elseif
             else if (trimLine.startsWith(keywords.get("elseif"))) {
-                // get last skip
-                boolean skip = skips.getFirst();
-                //
-                if (!skip) {
-                    // get last active state
+                // Check for skip
+                if (skips.getFirst()) {
+                    state.pop();
+                    state.push(false);
+                } else {
+                    // Get last active state
                     boolean active = state.getFirst();
                     // Evaluate elseif condition
                     active = (!active) & evaluateExpression(trimLine.substring(keywords.get("elseif").length()));
                     // Revert the last state
                     state.pop();
-                    // Store the last active state
+                    // Store the current active state
                     state.push((active) & state.getFirst());
-                    //
-                    skips.pop();
-                    skips.push(skip & skips.getFirst());
-                } else {
-                    state.pop();
-                    state.push(false);
+                    skips.push(active);
                 }
                 // Keep macro line
                 if (!remove) newLines.add(line);
             }
             // else
             else if (trimLine.startsWith(keywords.get("else"))) {
-                // get last skip
-                boolean skip = skips.getFirst();
-                //
-                if (!skip) {
+                // check for skip
+                if (skips.getFirst()) {
+                    state.pop();
+                    state.push(false);
+                } else {
                     // get last active state
                     boolean active = state.getFirst();
                     // Revert the last state
                     state.pop();
                     state.push((!active) & state.getFirst());
-                    //
-                    skips.pop();
-                    skips.push((!skip) & skips.getFirst());
-                } else {
-                    state.pop();
-                    state.push(false);
                 }
                 // Keep macro line
                 if (!remove) newLines.add(line);
             }
             // endif
             else if (trimLine.startsWith(keywords.get("endif"))) {
-                // Enable
+                // Pop the states
                 state.pop();
-                //
                 skips.pop();
                 // Keep macro line
                 if (!remove) newLines.add(line);
             } else {
-                // get last active state
-                boolean active = state.getFirst();
-                //
-                if (active)
+                // get current active state
+                if (state.getFirst()) {
                     newLines.add(uncommentLine(line, keywords));
-                else {
+                } else {
                     if (!remove) newLines.add(commentLine(line, keywords));
                 }
             }

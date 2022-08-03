@@ -36,26 +36,52 @@ public abstract class SourceType {
         remove = false;
     }
 
+    /**
+     * Returns whether this source type is enabled.
+     * @return whether this source type is enabled.
+     */
     public boolean getEnable() {
         return enable;
     }
 
+    /**
+     * Sets whether the preprocessor is enabled for this source type.
+     * @param enable Whether this source type is enabled.
+     */
     public void setEnable(boolean enable) {
         this.enable = enable;
     }
 
+    /**
+     * Returns whether changes are made in-place.
+     * @return Whether changes are made in-place.
+     */
     public boolean getInPlace() {
         return inPlace;
     }
 
+    /**
+     * Sets whether the preprocessor changes should be made in-place.
+     * That means that the changes will be applied directly to the source files.
+     * The latter is especially useful for development on Java source files.
+     * @param inPlace Whether the preprocessor should be applied in-place.
+     */
     public void setInPlace(boolean inPlace) {
         this.inPlace = inPlace;
     }
 
+    /**
+     * Returns whether preprocessor statements shall be removed.
+     * @return Whether preprocessor statements shall be removed.
+     */
     public boolean getRemove() {
         return remove;
     }
 
+    /**
+     * Sets whether preprocessor statements shall be removed.
+     * @param remove Whether preprocessor statements shall be removed.
+     */
     public void setRemove(boolean remove) {
         this.remove = remove;
     }

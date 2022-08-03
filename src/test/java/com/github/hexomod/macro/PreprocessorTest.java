@@ -125,8 +125,8 @@ public class PreprocessorTest {
         Preprocessor preprocessor = new Preprocessor(vars);
         lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
 
-        assertTrue(lines.get(1).compareTo(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(1).compareTo(preprocessor.commentLine(testLine, SLASH_KEYWORDS))==0);
+        assertEquals(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS), lines.get(1));
+        assertNotEquals(preprocessor.commentLine(testLine, SLASH_KEYWORDS), lines.get(1));
     }
 
     @Test
@@ -142,8 +142,8 @@ public class PreprocessorTest {
         Preprocessor preprocessor = new Preprocessor(vars);
         lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
 
-        assertFalse(lines.get(1).compareTo(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(1).compareTo(preprocessor.commentLine(testLine, SLASH_KEYWORDS))==0);
+        assertNotEquals(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS), lines.get(1));
+        assertEquals(preprocessor.commentLine(testLine, SLASH_KEYWORDS), lines.get(1));
     }
 
     @Test
@@ -163,11 +163,11 @@ public class PreprocessorTest {
         Preprocessor preprocessor = new Preprocessor(vars);
         lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
 
-        assertTrue(lines.get(1).compareTo(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(1).compareTo(preprocessor.commentLine(testLine1, SLASH_KEYWORDS))==0);
+        assertEquals(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS), lines.get(1));
+        assertNotEquals(preprocessor.commentLine(testLine1, SLASH_KEYWORDS), lines.get(1));
 
-        assertTrue(lines.get(3).compareTo(preprocessor.uncommentLine(testLine2, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(3).compareTo(preprocessor.commentLine(testLine2, SLASH_KEYWORDS))==0);
+        assertEquals(preprocessor.uncommentLine(testLine2, SLASH_KEYWORDS), lines.get(3));
+        assertNotEquals(preprocessor.commentLine(testLine2, SLASH_KEYWORDS), lines.get(3));
     }
 
     @Test
@@ -187,11 +187,11 @@ public class PreprocessorTest {
         Preprocessor preprocessor = new Preprocessor(vars);
         lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
 
-        assertTrue(lines.get(1).compareTo(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(3).compareTo(preprocessor.uncommentLine(testLine2, SLASH_KEYWORDS))==0);
+        assertEquals(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS), lines.get(1));
+        assertNotEquals(preprocessor.uncommentLine(testLine2, SLASH_KEYWORDS), lines.get(3));
 
-        assertFalse(lines.get(1).compareTo(preprocessor.commentLine(testLine1, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(3).compareTo(preprocessor.commentLine(testLine2, SLASH_KEYWORDS))==0);
+        assertNotEquals(preprocessor.commentLine(testLine1, SLASH_KEYWORDS), lines.get(1));
+        assertEquals(preprocessor.commentLine(testLine2, SLASH_KEYWORDS), lines.get(3));
     }
 
     @Test
@@ -213,13 +213,13 @@ public class PreprocessorTest {
         Preprocessor preprocessor = new Preprocessor(vars);
         lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
 
-        assertTrue(lines.get(1).compareTo(preprocessor.uncommentLine(testLine0, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(3).compareTo(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(5).compareTo(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS))==0);
+        assertEquals(preprocessor.uncommentLine(testLine0, SLASH_KEYWORDS), lines.get(1));
+        assertNotEquals(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS), lines.get(3));
+        assertNotEquals(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS), lines.get(5));
 
-        assertFalse(lines.get(1).compareTo(preprocessor.commentLine(testLine0, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(3).compareTo(preprocessor.commentLine(testLine1, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(5).compareTo(preprocessor.commentLine(testLine, SLASH_KEYWORDS))==0);
+        assertNotEquals(preprocessor.commentLine(testLine0, SLASH_KEYWORDS), lines.get(1));
+        assertEquals(preprocessor.commentLine(testLine1, SLASH_KEYWORDS), lines.get(3));
+        assertEquals(preprocessor.commentLine(testLine, SLASH_KEYWORDS), lines.get(5));
     }
 
     @Test
@@ -241,13 +241,13 @@ public class PreprocessorTest {
         Preprocessor preprocessor = new Preprocessor(vars);
         lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
 
-        assertFalse(lines.get(1).compareTo(preprocessor.uncommentLine(testLine0, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(3).compareTo(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(5).compareTo(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS))==0);
+        assertNotEquals(preprocessor.uncommentLine(testLine0, SLASH_KEYWORDS), lines.get(1));
+        assertEquals(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS), lines.get(3));
+        assertNotEquals(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS), lines.get(5));
 
-        assertTrue(lines.get(1).compareTo(preprocessor.commentLine(testLine0, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(3).compareTo(preprocessor.commentLine(testLine1, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(5).compareTo(preprocessor.commentLine(testLine, SLASH_KEYWORDS))==0);
+        assertEquals(preprocessor.commentLine(testLine0, SLASH_KEYWORDS), lines.get(1));
+        assertNotEquals(preprocessor.commentLine(testLine1, SLASH_KEYWORDS), lines.get(3));
+        assertEquals(preprocessor.commentLine(testLine, SLASH_KEYWORDS), lines.get(5));
     }
 
     @Test
@@ -269,17 +269,44 @@ public class PreprocessorTest {
         Preprocessor preprocessor = new Preprocessor(vars);
         lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
 
-        assertFalse(lines.get(1).compareTo(preprocessor.uncommentLine(testLine0, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(3).compareTo(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(5).compareTo(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS))==0);
+        assertNotEquals(preprocessor.uncommentLine(testLine0, SLASH_KEYWORDS), lines.get(1));
+        assertNotEquals(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS), lines.get(3));
+        assertEquals(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS), lines.get(5));
 
-        assertTrue(lines.get(1).compareTo(preprocessor.commentLine(testLine0, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(3).compareTo(preprocessor.commentLine(testLine1, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(5).compareTo(preprocessor.commentLine(testLine, SLASH_KEYWORDS))==0);
+        assertEquals(preprocessor.commentLine(testLine0, SLASH_KEYWORDS), lines.get(1));
+        assertEquals(preprocessor.commentLine(testLine1, SLASH_KEYWORDS), lines.get(3));
+        assertNotEquals(preprocessor.commentLine(testLine, SLASH_KEYWORDS), lines.get(5));
     }
 
-    @Test
-    public void processLines_complex_elseif_t_f_f() {
+	@Test
+	public void processLines_simple_elseif_f_t_f_f() {
+		String testLine0 = "String message = '0';";
+		String testLine1 = "String message = '1';";
+		String testLine2 = "String message = '2';";
+		String testLine = "String message = '';";
+
+		List<String> lines = new ArrayList<>();
+		lines.add("//#if VAR_INT>100");            // false
+		lines.add(testLine0);
+		lines.add("//#elseif VAR_INT<10");         // true
+		lines.add(testLine1);
+		lines.add("//#elseif VAR_BOOL");           // false (but condition true)
+		lines.add(testLine2);
+		lines.add("//#else");
+		lines.add(testLine);
+		lines.add("//#endif");
+
+		Preprocessor preprocessor = new Preprocessor(vars);
+		lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
+
+		assertEquals(preprocessor.commentLine(testLine0, SLASH_KEYWORDS), lines.get(1));
+		assertEquals(testLine1, lines.get(3));
+		assertEquals(preprocessor.commentLine(testLine2, SLASH_KEYWORDS), lines.get(5));
+		assertEquals(preprocessor.commentLine(testLine, SLASH_KEYWORDS), lines.get(7));
+	}
+
+	@Test
+	public void processLines_complex_elseif_t_f_f() {
 
         String testLine0 = "String message = '0';";
         String testLine1 = "String message = '1';";
@@ -307,19 +334,19 @@ public class PreprocessorTest {
         Preprocessor preprocessor = new Preprocessor(vars);
         lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
 
-        assertTrue(lines.get(1).compareTo(preprocessor.uncommentLine(testLine0, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(3).compareTo(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(5).compareTo(preprocessor.uncommentLine(testLine2, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(7).compareTo(preprocessor.uncommentLine(testLine3, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(10).compareTo(preprocessor.uncommentLine(testLine4, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(12).compareTo(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS))==0);
+        assertEquals(preprocessor.uncommentLine(testLine0, SLASH_KEYWORDS), lines.get(1));
+        assertEquals(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS), lines.get(3));
+        assertNotEquals(preprocessor.uncommentLine(testLine2, SLASH_KEYWORDS), lines.get(5));
+        assertNotEquals(preprocessor.uncommentLine(testLine3, SLASH_KEYWORDS), lines.get(7));
+        assertNotEquals(preprocessor.uncommentLine(testLine4, SLASH_KEYWORDS), lines.get(10));
+        assertNotEquals(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS), lines.get(12));
 
-        assertFalse(lines.get(1).compareTo(preprocessor.commentLine(testLine0, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(3).compareTo(preprocessor.commentLine(testLine1, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(5).compareTo(preprocessor.commentLine(testLine2, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(7).compareTo(preprocessor.commentLine(testLine3, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(10).compareTo(preprocessor.commentLine(testLine4, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(12).compareTo(preprocessor.commentLine(testLine, SLASH_KEYWORDS))==0);
+        assertNotEquals(preprocessor.commentLine(testLine0, SLASH_KEYWORDS), lines.get(1));
+        assertNotEquals(preprocessor.commentLine(testLine1, SLASH_KEYWORDS), lines.get(3));
+        assertEquals(preprocessor.commentLine(testLine2, SLASH_KEYWORDS), lines.get(5));
+        assertEquals(preprocessor.commentLine(testLine3, SLASH_KEYWORDS), lines.get(7));
+        assertEquals(preprocessor.commentLine(testLine4, SLASH_KEYWORDS), lines.get(10));
+        assertEquals(preprocessor.commentLine(testLine, SLASH_KEYWORDS), lines.get(12));
     }
 
     @Test
@@ -351,19 +378,19 @@ public class PreprocessorTest {
         Preprocessor preprocessor = new Preprocessor(vars);
         lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
 
-        assertFalse(lines.get(1).compareTo(preprocessor.uncommentLine(testLine0, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(3).compareTo(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(5).compareTo(preprocessor.uncommentLine(testLine2, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(7).compareTo(preprocessor.uncommentLine(testLine3, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(10).compareTo(preprocessor.uncommentLine(testLine4, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(12).compareTo(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS))==0);
+        assertNotEquals(preprocessor.uncommentLine(testLine0, SLASH_KEYWORDS), lines.get(1));
+        assertNotEquals(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS), lines.get(3));
+        assertNotEquals(preprocessor.uncommentLine(testLine2, SLASH_KEYWORDS), lines.get(5));
+        assertNotEquals(preprocessor.uncommentLine(testLine3, SLASH_KEYWORDS), lines.get(7));
+        assertEquals(preprocessor.uncommentLine(testLine4, SLASH_KEYWORDS), lines.get(10));
+        assertNotEquals(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS), lines.get(12));
 
-        assertTrue(lines.get(1).compareTo(preprocessor.commentLine(testLine0, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(3).compareTo(preprocessor.commentLine(testLine1, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(5).compareTo(preprocessor.commentLine(testLine2, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(7).compareTo(preprocessor.commentLine(testLine3, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(10).compareTo(preprocessor.commentLine(testLine4, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(12).compareTo(preprocessor.commentLine(testLine, SLASH_KEYWORDS))==0);
+        assertEquals(preprocessor.commentLine(testLine0, SLASH_KEYWORDS), lines.get(1));
+        assertEquals(preprocessor.commentLine(testLine1, SLASH_KEYWORDS), lines.get(3));
+        assertEquals(preprocessor.commentLine(testLine2, SLASH_KEYWORDS), lines.get(5));
+        assertEquals(preprocessor.commentLine(testLine3, SLASH_KEYWORDS), lines.get(7));
+        assertNotEquals(preprocessor.commentLine(testLine4, SLASH_KEYWORDS), lines.get(10));
+        assertEquals(preprocessor.commentLine(testLine, SLASH_KEYWORDS), lines.get(12));
     }
 
     @Test
@@ -395,19 +422,19 @@ public class PreprocessorTest {
         Preprocessor preprocessor = new Preprocessor(vars);
         lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
 
-        assertFalse(lines.get(1).compareTo(preprocessor.uncommentLine(testLine0, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(3).compareTo(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(5).compareTo(preprocessor.uncommentLine(testLine2, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(7).compareTo(preprocessor.uncommentLine(testLine3, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(9).compareTo(preprocessor.uncommentLine(testLine4, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(11).compareTo(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS))==0);
+        assertNotEquals(preprocessor.uncommentLine(testLine0, SLASH_KEYWORDS), lines.get(1));
+        assertNotEquals(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS), lines.get(3));
+        assertEquals(preprocessor.uncommentLine(testLine2, SLASH_KEYWORDS), lines.get(5));
+        assertNotEquals(preprocessor.uncommentLine(testLine3, SLASH_KEYWORDS), lines.get(7));
+        assertNotEquals(preprocessor.uncommentLine(testLine4, SLASH_KEYWORDS), lines.get(9));
+        assertEquals(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS), lines.get(11));
 
-        assertTrue(lines.get(1).compareTo(preprocessor.commentLine(testLine0, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(3).compareTo(preprocessor.commentLine(testLine1, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(5).compareTo(preprocessor.commentLine(testLine2, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(7).compareTo(preprocessor.commentLine(testLine3, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(9).compareTo(preprocessor.commentLine(testLine4, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(11).compareTo(preprocessor.commentLine(testLine, SLASH_KEYWORDS))==0);
+        assertEquals(preprocessor.commentLine(testLine0, SLASH_KEYWORDS), lines.get(1));
+        assertEquals(preprocessor.commentLine(testLine1, SLASH_KEYWORDS), lines.get(3));
+        assertNotEquals(preprocessor.commentLine(testLine2, SLASH_KEYWORDS), lines.get(5));
+        assertEquals(preprocessor.commentLine(testLine3, SLASH_KEYWORDS), lines.get(7));
+        assertEquals(preprocessor.commentLine(testLine4, SLASH_KEYWORDS), lines.get(9));
+        assertNotEquals(preprocessor.commentLine(testLine, SLASH_KEYWORDS), lines.get(11));
     }
 
     @Test
@@ -432,12 +459,12 @@ public class PreprocessorTest {
         Preprocessor preprocessor = new Preprocessor(vars);
         lines = preprocessor.processLines(lines, SLASH_KEYWORDS);
 
-        assertTrue(lines.get(2).compareTo(preprocessor.uncommentLine(testLine0, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(4).compareTo(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS))==0);
-        assertFalse(lines.get(6).compareTo(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS))==0);
+        assertEquals(preprocessor.uncommentLine(testLine0, SLASH_KEYWORDS), lines.get(2));
+        assertNotEquals(preprocessor.uncommentLine(testLine1, SLASH_KEYWORDS), lines.get(4));
+        assertNotEquals(preprocessor.uncommentLine(testLine, SLASH_KEYWORDS), lines.get(6));
 
-        assertFalse(lines.get(2).compareTo(preprocessor.commentLine(testLine0, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(4).compareTo(preprocessor.commentLine(testLine1, SLASH_KEYWORDS))==0);
-        assertTrue(lines.get(6).compareTo(preprocessor.commentLine(testLine, SLASH_KEYWORDS))==0);
+        assertNotEquals(preprocessor.commentLine(testLine0, SLASH_KEYWORDS), lines.get(2));
+        assertEquals(preprocessor.commentLine(testLine1, SLASH_KEYWORDS), lines.get(4));
+        assertEquals(preprocessor.commentLine(testLine, SLASH_KEYWORDS), lines.get(6));
     }
 }

@@ -30,6 +30,7 @@ import groovy.lang.Closure;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.internal.project.ProjectInternal;
+import org.gradle.api.tasks.Internal;
 import org.gradle.internal.Actions;
 import org.gradle.util.ConfigureUtil;
 
@@ -97,19 +98,35 @@ public class PreprocessorExtension extends SourceType {
         return this.vars;
     }
 
+    /**
+     * Sets the preprocessor variables.
+     * @param vars the variables
+     */
     public void setVars(Map<String, Object> vars) {
         this.vars.putAll(vars);
     }
 
 
+    /**
+     * Returns the directory where preprocessed files will be stored.
+     * @return the directory where preprocessed files will be stored.
+     */
     public File getProcessDir() {
         return processDir;
     }
 
+    /**
+     * Sets the directory where preprocessed files will be stored.
+     * @param processDir the directory
+     */
     public void setProcessDir(File processDir) {
         this.processDir = processDir;
     }
 
+    /**
+     * Sets the directory where preprocessed files will be stored.
+     * @param processDir the directory, relative to the project build directory
+     */
     public void setProcessDir(String processDir) {
         String buildName = this.project.getBuildDir().getName();
         if (processDir.startsWith(buildName)) {
@@ -119,11 +136,18 @@ public class PreprocessorExtension extends SourceType {
         }
     }
 
-
+    /**
+     * Returns whether verbose logging to console is enabled.
+     * @return whether verbose logging to console is enabled.
+     */
     public boolean getVerbose() {
         return verbose;
     }
 
+    /**
+     * Sets the verbose logging mode.
+     * @param verbose whether to enable verbose mode
+     */
     public void setVerbose(boolean verbose) {
         this.verbose = verbose;
     }
@@ -133,10 +157,20 @@ public class PreprocessorExtension extends SourceType {
         return java;
     }
 
+    /**
+     * Configure how to process java files.
+     * @param closure the configuration closure
+     * @return the configuration object
+     */
     public Java java(Closure closure) {
         return ConfigureUtil.configure(closure, java);
     }
 
+    /**
+     * Configure how to process java files.
+     * @param action the configuration action
+     * @return the configuration object
+     */
     public Java java(Action<? super Java> action) {
         return Actions.with(java, action);
     }
@@ -146,15 +180,25 @@ public class PreprocessorExtension extends SourceType {
         return resources;
     }
 
+    /**
+     * Configure how to process resources files.
+     * @param closure the configuration closure
+     * @return the configuration object
+     */
     public Resources resources(Closure closure) {
         return ConfigureUtil.configure(closure, resources);
     }
 
+    /**
+     * Configure how to process resources files.
+     * @param action the configuration action
+     * @return the configuration object
+     */
     public Resources resources(Action<? super Resources> action) {
         return Actions.with(resources, action);
     }
 
-
+    @Internal
     // Print out a string if verbose is enabled
     public void log(String msg) {
         if (getVerbose()) {
